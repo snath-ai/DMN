@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "lar-engine"
 version = "1.0.0"
-description = "Lár: The PyTorch for Agents. A 'define-by-run' agentic framework."
+description = "Lár DMN: A Showcase of Cognitive Architectures (Bicameral Memory, Autopoiesis) built on the Lár Engine."
 authors = ["Aadithya Vishnu Sajeev <axdithya@snath.ai>", "Vinay S <vinay@snath.ai>"]
 maintainers = ["Aadithya Vishnu Sajeev <axdithya@snath.ai>", "Vinay S <vinay@snath.ai>"]
 license = "Apache-2.0"

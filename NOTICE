@@ -1,8 +1,11 @@
-Copyright (c) 2025 Aadithya Vishnu Sajeev & Vinay S
+Lár DMN: A Showcase of Cognitive Architectures
+Copyright 2025 Aadithya Vishnu Sajeev & Vinay S
 
-This product includes software developed by Aadithya Vishnu Sajeev and Vinay S.
+This product includes software developed by Snath.ai.
 
-Licensed under the Apache License, Version 2.0.
-You must retain this notice if you distribute or modify this software.
+This repository is a specialized showcase of cognitive architectures, demonstrating concepts such as:
+- Bicameral Memory Systems
+- Autopoietic (Self-Creating) AI
+- Neuro-Mimetic Design Pattern (Thalamus/Amygdala/Hippocampus/DMN)
 
-Modifications made to this software must be documented and attributed.
+It is built upon the Lár Engine foundation but serves distinct educational and demonstrative purposes.

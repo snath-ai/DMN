@@ -106,4 +106,5 @@ docker-compose up --build -d
 
 ## License
 **Apache 2.0**.
-Built on [Lár Engine](https://github.com/snath-ai/lar).
+
+**Note**: This repository is a **Showcase of Cognitive Architectures** built upon the [Lár Engine](https://github.com/snath-ai/lar). It is intended to demonstrate advanced concepts in Autopoietic AI, Bicameral Memory, and Neuro-Mimetic design.
