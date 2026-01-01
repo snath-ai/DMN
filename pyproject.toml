@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lar-engine"
-version = "0.7.1"
+version = "1.0.0"
 description = "Lár: The PyTorch for Agents. A 'define-by-run' agentic framework."
 authors = ["Aadithya Vishnu Sajeev <axdithya@snath.ai>", "Vinay S <vinay@snath.ai>"]
 maintainers = ["Aadithya Vishnu Sajeev <axdithya@snath.ai>", "Vinay S <vinay@snath.ai>"]

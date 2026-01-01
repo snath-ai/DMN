@@ -11,7 +11,7 @@
   </a>
 </p>
 
-# Lár DMN: Bicameral Memory Architecture
+# Lár DMN: Bicameral Memory Architecture (v1.0.0)
 
 This repository is a specialized **technical showcase** of the [Lár Engine](https://github.com/snath-ai/lar), demonstrating how to build an AI agent with a **Default Mode Network (DMN)**.
 
