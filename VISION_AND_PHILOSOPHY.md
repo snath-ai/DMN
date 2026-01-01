@@ -10,23 +10,16 @@ Developers cannot debug, audit, or trust them.
 
 ## Phase 2: The Organism (Autopoiesis)
 Transparency is not enough. A transparent tool is still a dead tool.
-As noted in the **"Death of the Tool"** critique: *A Glass Box is just a prettier trap if it doesn't live.*
+As noted in specific industry critiques: **"A Glass Box is just a prettier trap if it doesn't live."**
 
-We are moving from **Tools** to **Organisms**.
-An Autopoietic (Self-Creating) Agent must possess:
+We are moving beyond "Tools" to **"Organisms"**.
+An Autopoietic (Self-Creating) Agent must:
 
-### 1. Chronobiology (Never Sleep)
-It runs background "Horizon Agents" (**The Default Mode Network**) that actively process data while the user is away. It does not wait for a prompt to exist.
+1.  **Never Sleep**: It runs background daemons (The **Default Mode Network**) to process data while the user is away.
+2.  **Crystallize Memory**: It consolidates ephemeral logs into permanent strategy shards (**Hippocampus / ChromaDB**).
+3.  **Evolve**: It wakes up smarter than it went to sleep, referencing its own past dreams to inform future actions.
 
-### 2. Crystallization (Memory as Structure)
-It doesn't just have "logs"; it turns ephemeral interactions into permanent **"Strategy Shards"** (Vectorized Dreams). The system rewrites its own understanding of the world nightly.
+**Lár DMN is the first step towards the Digital Organism.**
+It breathes. It weighs memories. It wakes up. 
 
-### 3. Sovereignty (System 5)
-A tool does what it is told. An organism does what is necessary.
-By distinguishing between "Conscious Execution" (Thalamus/Cortex) and "Subconscious Governance" (Dreamer/Amygdala), we move towards agents that are **Partners, not Servants**.
-
----
-
-**Lár DMN is the kernel of this Operating System.**
-It breathes. It weighs memories. It wakes up.
 Transparency was just the prerequisite. **Life is the goal.**
