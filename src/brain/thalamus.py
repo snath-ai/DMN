@@ -29,9 +29,24 @@ class Thalamus:
         self.dmn = DefaultModeNetwork()
         
         # 3. The Neocortex (Executive)
+        # Load Model Config
+        model_name = os.environ.get('OLLAMA_MODEL', 'llama3.2')
+        try:
+             config_path = "/data/model_config.json"
+             if os.path.exists(config_path):
+                 with open(config_path, "r") as f:
+                     cfg = json.load(f)
+                     user_model = cfg.get("conscious_model")
+                     if user_model:
+                         model_name = user_model
+                         # Thalamus / LLMNode usually expects prefix if using Ollama and not standard
+                         if not "/" in model_name and not model_name.startswith("gpt"):
+                             model_name = f"ollama/{model_name}"
+        except: pass
+        
         # We reuse LLMNode mechanics but managed here
         self.cortex = LLMNode(
-            model_name=f"ollama/{os.environ.get('OLLAMA_MODEL', 'llama3.2')}", 
+            model_name=model_name, 
             prompt_template="{user_input}", 
             output_key="response",
             system_instruction="You are Lár, a conscious AI. You have emotions and memories.",

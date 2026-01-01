@@ -230,6 +230,94 @@ if st.sidebar.button("🛌 Force R.E.M. Sleep"):
         except Exception as e:
             st.error(f"Dream failed: {e}")
 
+# --- Neural Configuration (Model Switcher) ---
+st.sidebar.markdown("---")
+st.sidebar.subheader("🎛️ Neural Configuration")
+
+def get_ollama_models():
+    """Fetches available models from local Ollama instance."""
+    try:
+        import requests
+        # Use localhost inside container to talk to host, or OLLAMA_HOST env
+        host = os.environ.get("OLLAMA_HOST", "http://host.docker.internal:11434")
+        if not host.startswith("http"): host = f"http://{host}:11434"
+        
+        # Strip /api/generate if present for the tags endpoint
+        base_host = host.replace("/api/generate", "")
+        
+        response = requests.get(f"{base_host}/api/tags", timeout=2)
+        if response.status_code == 200:
+            data = response.json()
+            return [m["name"] for m in data.get("models", [])]
+    except Exception as e:
+        # Fallback if offline
+        pass
+    return ["llama3.2", "qwen2.5:14b", "mistral"]
+
+# Load Config
+CONFIG_PATH = "/data/model_config.json"
+model_config = {"conscious_model": "llama3.2", "subconscious_model": "qwen2.5:14b"}
+if os.path.exists(CONFIG_PATH):
+    try:
+        with open(CONFIG_PATH, "r") as f:
+            model_config.update(json.load(f))
+    except: pass
+
+available_models = get_ollama_models()
+
+# Ensure current config models are in the list (handle customs)
+for m in model_config.values():
+    if m not in available_models:
+        available_models.append(m)
+
+# UI Controls
+conscious_model = st.sidebar.selectbox(
+    "☀️ Conscious Mind (Fast)", 
+    options=available_models,
+    index=available_models.index(model_config["conscious_model"]) if model_config["conscious_model"] in available_models else 0
+)
+
+subconscious_model = st.sidebar.selectbox(
+    "🌙 Subconscious Mind (Smart)", 
+    options=available_models,
+    index=available_models.index(model_config["subconscious_model"]) if model_config["subconscious_model"] in available_models else 0
+)
+
+# Save & Apply
+if conscious_model != model_config["conscious_model"] or subconscious_model != model_config["subconscious_model"]:
+    new_config = {
+        "conscious_model": conscious_model,
+        "subconscious_model": subconscious_model
+    }
+    with open(CONFIG_PATH, "w") as f:
+        json.dump(new_config, f)
+    
+    # Live update the running brain
+    if "brain" in st.session_state:
+        # Verify it's not the same to avoid redundant updates?
+        # Actually LLMNode handles string updates fine.
+        # We assume Ollama format. If the user picked a non-ollama string (e.g. gpt-4), LiteLLM handles it.
+        # But our fetching logic assumes Ollama. 
+        # For now, we prepend 'ollama/' if it's from the list, ONLY if it doesn't have a provider prefix.
+        # But wait, LLMNode logic in Thalamus adds 'ollama/' prefix hardcoded. 
+        # We should fix Thalamus to be flexible if we want full LiteLLM support.
+        # For now, let's assume Thalamus.cortex needs to be updated.
+        
+        # We need to hackily update the cortex model_name
+        # Thalamus.cortex is an LLMNode.
+        # LLMNode.__init__ sets self.model_name.
+        # We can just update the attribute.
+        
+        # Handle the prefix logic that Thalamus usually does
+        target_model = conscious_model
+        if not "/" in target_model and not target_model.startswith("gpt"):
+             target_model = f"ollama/{target_model}"
+             
+        st.session_state.brain.cortex.model_name = target_model
+        st.toast(f"Brain rewired to {conscious_model}")
+        time.sleep(0.5)
+        st.rerun()
+
 if st.sidebar.button("🔄 Refresh Data"):
     st.cache_data.clear()
     st.rerun()

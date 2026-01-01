@@ -120,6 +120,18 @@ class DefaultModeNetwork:
 
         print(f"🧠 [DMN] Consolidating {len(recent_logs)} recent episodes...")
         
+        # --- MODEL SWITCHER SUPPORT ---
+        current_model = DEFAULT_MODEL
+        try:
+             config_path = "/data/model_config.json"
+             if os.path.exists(config_path):
+                 with open(config_path, "r") as f:
+                     cfg = json.load(f)
+                     current_model = cfg.get("subconscious_model", DEFAULT_MODEL)
+                     print(f"🧠 [DMN] Using user-selected model: {current_model}")
+        except Exception as e:
+             print(f"⚠️ [DMN] Config Load Error: {e}")
+
         # Prepare the prompt
         # SANITIZATION: Convert JSON logs to a plain text transcript to prevent LLM from mimicking JSON structure.
         conversation_text = ""
@@ -152,7 +164,7 @@ class DefaultModeNetwork:
             response = requests.post(
                 OLLAMA_URL_GENERATE,
                 json={
-                    "model": DEFAULT_MODEL,
+                    "model": current_model,
                     "prompt": full_prompt,
                     "stream": False,
                     "format": "" # Disable JSON mode
