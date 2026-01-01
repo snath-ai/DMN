@@ -433,7 +433,7 @@ with tab2:
                     if isinstance(insights, (dict, list)):
                         st.json(insights)
                     else:
-                        st.info(f"Raw Content: {insights}")
+                        st.code(str(insights), language="markdown")
 
                 # 1. Handle List of Strings (Standard)
                 if isinstance(insights, list):
