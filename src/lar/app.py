@@ -423,7 +423,10 @@ with tab2:
                 # Checkbox used because nested expanders are not allowed in Streamlit
                 dream_id = dream.get("id", str(ts))
                 if st.checkbox("🔍 Show Raw Dream Data", key=f"raw_{dream_id}"):
-                    st.json(insights)
+                    if isinstance(insights, (dict, list)):
+                        st.json(insights)
+                    else:
+                        st.info(f"Raw Content: {insights}")
 
                 # 1. Handle List of Strings (Standard)
                 if isinstance(insights, list):
