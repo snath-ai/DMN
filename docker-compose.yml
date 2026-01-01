@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  # Service A: The Conscious Mind (Streamlit)
+  awake:
+    build:
+      context: .
+      dockerfile: services/awake/Dockerfile
+    container_name: lar-awake
+    ports:
+      - "8501:8501"
+    volumes:
+      - ./data:/data # Shared Brain
+      - ./src:/app/src # Code Sharing (Hot Reloadish)
+    environment:
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - OLLAMA_MODEL=llama3.2
+      - LOG_FILE=/data/short_term_memory.jsonl
+      - MEMORY_FILE=/data/long_term_insights.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  # Service B: The Subconscious (Dreamer Daemon)
+  dreamer:
+    build:
+      context: .
+      dockerfile: services/dreamer/Dockerfile
+    container_name: lar-dreamer
+    volumes:
+      - ./data:/data # Shared Brain
+      - ./src:/app/src # Code Sharing
+      - ./services:/app/services # Hot Reload Worker
+    environment:
+      - OLLAMA_HOST=http://host.docker.internal:11434
+      - OLLAMA_MODEL=qwen2.5:14b
+      - LOG_FILE=/data/short_term_memory.jsonl
+      - MEMORY_FILE=/data/long_term_insights.json
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped

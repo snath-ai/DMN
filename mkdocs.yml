@@ -1,0 +1,56 @@
+site_name: 'Lár - The PyTorch for Agents'
+site_author: Lár Project
+site_url: https://snath-ai.github.io/lar/
+repo_name: snath-ai/lar
+repo_url: https://github.com/snath-ai/lar
+edit_uri: ""
+
+theme:
+  name: material
+  palette:
+    - scheme: slate
+      primary: black  
+      accent: grey     
+      code:
+        # Sets the background color for code blocks and inline code
+        # We will use a highly visible, light color like white or very light grey.
+        background: "#F5F5F5" 
+        # Sets the foreground (text) color for high contrast
+        foreground: "#1C2132"
+  features:
+    - navigation.tabs
+    - navigation.top
+    - search.suggest
+    - content.code.annotate
+  custom_dir: theme_overrides
+  favicon: 'assets/lar-logo.png'
+  extra_css:
+    - assets/extra.css
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+nav:
+  - 'Home': index.md
+  - 'Getting Started': getting-started.md
+  - 'Core Concepts':
+    - 'The "Glass Box" Philosophy': core-concepts/1-philosophy.md
+    - 'The 6 Primitives': core-concepts/2-architecture.md
+    - 'The Audit Log': core-concepts/3-audit-log.md
+  - 'Guides':
+
+    - 'Multi-Agent Orchestration': guides/multi-agent-orchestration.md
+    - 'Self-Correcting Loops': guides/self-correction-loop.md
+
+  - 'API Reference':
+    - 'LLMNode': api-reference/llmnode.md
+    - 'ToolNode': api-reference/toolnode.md
+    - 'RouterNode': api-reference/routernode.md
+    - 'AddValueNode': api-reference/addvaluenode.md
+    - 'ClearErrorNode': api-reference/clearerrornode.md
+    - 'Utilities': api-reference/utilities.md

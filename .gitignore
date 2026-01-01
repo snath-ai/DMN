@@ -1,0 +1,49 @@
+--- Secrets ---
+
+Never commit your API keys or environment files.
+
+.env
+.env*
+firestore-key.json
+
+--- Python ---
+
+Bytecode and cache
+
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+--- Poetry ---
+
+The virtual environment
+
+.venv/
+
+Build artifacts (THIS IS THE FIX)
+
+dist/
+
+--- IDE / OS Specific ---
+
+macOS
+
+.DS_Store
+
+VSCode
+
+.vscode/
+
+PyCharm / IntelliJ
+
+.idea/
+
+--- Testing ---
+
+.pytest_cache/
+coverage.xml
+htmlcov/
+
+# Ignore agent audit logs
+lar_logs/

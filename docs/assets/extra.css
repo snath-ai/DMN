@@ -1,0 +1,23 @@
+/* 1. Hide the container of the title */
+.md-header .md-header__title,
+.md-header__title {
+    display: none !important;
+    visibility: hidden !important;
+    width: 0 !important;
+    opacity: 0 !important;
+}
+
+/* 2. Hide the inner text span specifically just in case */
+.md-header__topic {
+    display: none !important;
+}
+
+/* 3. Force the logo container to be visible */
+/* Note: In Material, the logo is usually a sibling of title inside .md-header__button.md-logo OR separate */
+.md-header__button.md-logo {
+    display: block !important;
+    visibility: visible !important;
+    width: auto !important;
+    opacity: 1 !important;
+    margin-right: 1rem;
+}
