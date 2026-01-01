@@ -68,8 +68,9 @@ docker-compose up --build
 
 ### 3. Observe the Cycle
 1.  **Conscious Phase**: Interact with the agent at `http://localhost:8501`.
-2.  **Sleep Phase**: Stop interacting. Watch the sidebar timer.
-3.  **Consolidation**: The DMN will activate in the terminal logs, processing your chat.
+2.  **Configuration**: Use the sidebar to switch models (e.g., `llama3` for speed, `qwen2.5` for complex reasoning).
+3.  **Sleep Phase**: Stop interacting. Watch the sidebar timer.
+4.  **Consolidation**: The DMN will activate in the terminal logs, processing your chat.
 4.  **Wake Phase**: Resume the chat. The agent will seemingly "remember" or be influenced by the background processing.
 
 ---
