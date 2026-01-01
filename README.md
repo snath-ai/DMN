@@ -1,120 +1,101 @@
 <p align="center">
   <img src="https://raw.githubusercontent.com/snath-ai/.github/main/assets/lar-logo.png" width="80" alt="Lár Logo" />
 </p>
-<p align="center"><em>Lár: The Bicameral Mind</em></p>
+<p align="center"><em>Lár: The DMN Project</em></p>
 <p align="center">
-  <a href="https://github.com/snath-ai/DMN">
-    <img alt="Public Showcase" src="https://img.shields.io/badge/Showcase-DMN-blueviolet?style=for-the-badge">
+  <a href="https://github.com/snath-ai/lar">
+    <img alt="Based on" src="https://img.shields.io/badge/Variant%20of-Lár%20Engine-blue?style=for-the-badge">
   </a>
-   <a href="https://pypi.org/project/lar-engine/">
-    <img alt="Powered By" src="https://img.shields.io/badge/Powered%20By-LAR%20Engine-blue?style=for-the-badge">
+   <a href="https://github.com/snath-ai/DMN">
+    <img alt="Architecture" src="https://img.shields.io/badge/Architecture-Bicameral%20Mind-blueviolet?style=for-the-badge">
   </a>
 </p>
 
-# Lár: The Default Mode Network (DMN)
+# Lár DMN: Bicameral Memory Architecture
 
-> **"The user controls the dream, but the memory is authentic."**
+This repository is a specialized **technical showcase** of the [Lár Engine](https://github.com/snath-ai/lar), demonstrating how to build an AI agent with a **Default Mode Network (DMN)**.
 
-This repository is a **Public Showcase** of the **Default Mode Network (DMN)** implementation using the **Lár Engine**. It demonstrates how to build an AI agent with a "Bicameral Mind"—a distinct separation between Conscious Processing and Subconscious Consolidation.
+It explores the concept of **"Biomimetic AI"**: moving beyond stateless request/response loops to a system that maintains a continuous, background cognitive life cycle.
 
-## 🧠 The Concept
+## ⚡ Architecture: The "Bicameral" Loop
 
-Most AI agents are **stateless execution loops**. They run, they finish, they die.
-**Lár is different.** It has a 24/7 background process that mimics the human brain's **Default Mode Network**.
+Unlike standard agents that are purely reactive (Input -> Output -> Die), the Lár DMN implements a separation between **Conscious Processing** and **Subconscious Consolidation**.
 
-### The Bicameral Architecture
-
-1.  **Thinking Fast (Conscious)**: The "Awake" agent. It talks to you, runs tools, and logs experiences to Short-Term Memory.
-2.  **Thinking Slow (Subconscious)**: The "Dreamer" agent. When the user stops interacting, it "wakes up" in the background. It reads recent logs, reflects on them, and consolidates them into Long-Term Memory (Vector DB).
-
-```mermaid
-graph TD
-    User([User]) <--> Awake[Conscious Agent - 'Awake']
-    Awake -->|Writes| STM[Short Term Memory (Logs)]
-    
-    subgraph "The Subconscious (Background Daemon)"
-        STM --> Dreamer[The Dreamer (DMN)]
-        Dreamer -->|Consolidates| LTM[Hippocampus (ChromaDB + JSON)]
-        Dreamer -->|Generates| Vectors[Semantic Vectors]
-    end
-    
-    LTM -->|Recall| Awake
-```
+| Component | Standard Architecture | Lár DMN Architecture |
+| :--- | :--- | :--- |
+| **Lifecycle** | **Reactive**. Idle until prompted. | **Continuous**. Active background processes ("Dreaming") during idle time. |
+| **Memory** | **Stateless / Conversation History**. | **Consolidated**. A "Hippocampus" converts logs into vector embeddings during sleep. |
+| **Context** | **Static**. "You are a helpful assistant." | **Dynamic**. System prompts evolve based on simulated emotion and recent dreams. |
 
 ---
 
-## 🧩 Neuro-Anatomy
+## 🧠 Core Neuro-Modules
 
-The main `src/brain` directory implements cognitive modules inspired by neuroscience:
+This project implements specific architectural components inspired by biological cognition:
 
-### 1. The Thalamus (Router)
-The "Switchboard" of the brain. It constructs the System Prompt dynamically based on:
--   **Current Input**: What the user just said.
--   **Amygdala State**: The agent's current simulated emotion.
--   **Hippocampus**: Relevant memories retrieved via Semantic Search.
+### 1. The Default Mode Network (Background Daemon)
+Implemented as a separate Docker service (`lar-dreamer`).
+-   **Trigger**: Activates when the main agent is idle (simulated "Sleep").
+-   **Process**: Analyzes the recent interaction logs ("Short Term Memory").
+-   **Output**: Synthesizes a narrative summary ("Dream") and saves it to Long-Term Memory.
 
-### 2. The Amygdala (Emotion)
-Tracks a simulated emotional state (Joy, Anger, Surprise, Fear).
--   It analyzes user input *before* the conscious agent sees it.
--   It colors the System Prompt (e.g., if "Anger" is high, the prompt becomes "You are terse and defensive.").
+### 2. The Hippocampus (Dual-Write Memory)
+A hybrid memory system that bridges the gap between massive context windows and efficient retrieval.
+-   **Narrative Store (JSON)**: Preserves the chronological story of the agent's experiences.
+-   **Vector Store (ChromaDB)**: Embeds these experiences for semantic retrieval (RAG).
+-   *Why?* This allows the agent to recall "concepts" similar to the current conversation, not just recent keywords.
 
-### 3. The Hippocampus (Memory)
-A dual-write memory system:
--   **Narrative (JSON)**: Stores linear stories of "Dreams" (what the DMN thought about).
--   **Associative (ChromaDB)**: Stores vector embeddings of those dreams for O(log n) semantic retrieval.
-
-### 4. The Dreamer (DMN)
-A background worker that triggers when the system is **Idle**.
--   It reads recent chat logs.
--   It "hallucinates" a narrative summary (a Dream).
--   It saves this dream to the Hippocampus.
+### 3. The Thalamus (Dynamic Router)
+The input processing layer. Instead of sending user text directly to the model, the Thalamus:
+1.  **Injects Emotion**: Checks the simulated `Amygdala` state (e.g., Fear, Joy).
+2.  **Retrieves Context**: Queries the `Hippocampus` for relevant past "dreams".
+3.  **Constructs Prompt**: Builds a unique system prompt for *that specific turn*.
 
 ---
 
-## ⚙️ How It Works (The Wake-Up Loop)
+## 🚀 Usage Guide
 
-1.  **Sleep**: If you don't talk to Lár for 30s, he enters "Sleep Mode". The `dreamer` container activates.
-2.  **Dream**: The DMN processes your last conversation, extracting patterns and "feelings".
-3.  **Wake Up**: When you poke him awake, the **Thalamus** executes the **Wake Up Protocol**:
-    *   It checks the `latest_dream`.
-    *   It injects a "residue" of that dream into the prompt.
-    *   *Example Response*: "Huh? Oh... I was just dreaming about that code refactor we did..."
-
----
-
-## 🚀 Usage
-
-### Prerequisites
+### 1. Requirements
 -   Docker & Docker Compose
--   [Ollama](https://ollama.com/) running locally (for the LLM backend)
+-   [Ollama](https://ollama.com/) (running `llama3.2` or similar)
 
-### Run the Brain
+### 2. Start the Architecture
+This spins up the two hemispheres of the brain: `awake` (UI) and `dreamer` (Background).
 
 ```bash
-# 1. Start the Bicameral Containers
 docker-compose up --build
 ```
 
-Access the "Conscious" Dashboard at `http://localhost:8501`.
+### 3. Observe the Cycle
+1.  **Conscious Phase**: Interact with the agent at `http://localhost:8501`.
+2.  **Sleep Phase**: Stop interacting. Watch the sidebar timer.
+3.  **Consolidation**: The DMN will activate in the terminal logs, processing your chat.
+4.  **Wake Phase**: Resume the chat. The agent will seemingly "remember" or be influenced by the background processing.
 
-### Directory Structure
+---
+
+## 📂 Project Structure
 
 ```text
 lar/
-├── services/           # Docker Services
-│   ├── awake/          # The Streamlit UI (Conscious)
-│   └── dreamer/        # The Background Daemon (Subconscious)
+├── services/
+│   ├── awake/          # CONSCIOUS: Streamlit UI
+│   └── dreamer/        # SUBCONSCIOUS: Background Python Worker
 ├── src/
-│   ├── brain/          # Neuro-Anatomy (Amygdala, Thalamus, Hippocampus, DMN)
-│   └── lar/            # Core Lár Engine components
-├── data/               # Persistent Volume (ChromaDB)
-├── memory/             # JSON Memory Stores
-└── docker-compose.yml  # Orchestration
+│   ├── brain/          # NEURO-MODULES
+│   │   ├── amygdala.py # Emotion State Machine
+│   │   ├── thalamus.py # Input Routing & Prompting
+│   │   ├── hippocampus.py # Vector Memory (ChromaDB)
+│   │   └── default_mode_network.py # Consolidation Logic
+│   └── lar/            # BASE ENGINE
+└── memory/             # PERSISTENCE
+    ├── dreams.json     # Sequential Log
+    └── chroma_db/      # Vector Index
 ```
 
 ---
 
 ## 🛡️ License
 
-This showcase is licensed under **Apache 2.0**.
-Powered by the **[Lár Engine](https://github.com/snath-ai/lar)**.
+This project is open source under **Apache 2.0**.
+It serves as a reference implementation for advanced cognitive architectures using the **[Lár Engine](https://github.com/snath-ai/lar)**.
