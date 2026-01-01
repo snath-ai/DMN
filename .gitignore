@@ -46,4 +46,8 @@ coverage.xml
 htmlcov/
 
 # Ignore agent audit logs
+# Ignore agent audit logs
 lar_logs/
+
+# Runtime Data (Memories, Vectors, Configs)
+data/
