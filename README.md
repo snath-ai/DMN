@@ -15,9 +15,9 @@
 
 This repository is a specialized **technical showcase** of the [Lár Engine](https://github.com/snath-ai/lar), demonstrating how to build an AI agent with a **Default Mode Network (DMN)**.
 
-It explores the concept of **"Biomimetic AI"**: moving beyond stateless request/response loops to a system that maintains a continuous, background cognitive life cycle.
+It explores the concept of **Biomimetic AI**: moving beyond stateless request/response loops to a system that maintains a continuous, background cognitive life cycle.
 
-## ⚡ Architecture: The "Bicameral" Loop
+## Architecture: The "Bicameral" Loop
 
 Unlike standard agents that are purely reactive (Input -> Output -> Die), the Lár DMN implements a separation between **Conscious Processing** and **Subconscious Consolidation**.
 
@@ -29,7 +29,7 @@ Unlike standard agents that are purely reactive (Input -> Output -> Die), the L�
 
 ---
 
-## 🧠 Core Neuro-Modules
+## Core Neuro-Modules
 
 This project implements specific architectural components inspired by biological cognition:
 
@@ -53,7 +53,7 @@ The input processing layer. Instead of sending user text directly to the model, 
 
 ---
 
-## 🚀 Usage Guide
+## Usage Guide
 
 ### 1. Requirements
 -   Docker & Docker Compose
@@ -74,7 +74,7 @@ docker-compose up --build
 
 ---
 
-## 📂 Project Structure
+## Project Structure
 
 ```text
 lar/
@@ -95,7 +95,7 @@ lar/
 
 ---
 
-## 🛡️ License
+## License
 
 This project is open source under **Apache 2.0**.
 It serves as a reference implementation for advanced cognitive architectures using the **[Lár Engine](https://github.com/snath-ai/lar)**.
