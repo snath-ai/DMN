@@ -392,7 +392,14 @@ with tab2:
             # FIX: Robust timestamp reading
             ts = dream.get("timestamp") or dream.get("dream_timestamp") or "Unknown Time"
 
-            count = dream.get("log_count") or dream.get("analyzed_entries_count", 0)
+            # Hybrid support: older logs have 'log_count' at top, new ones might vary
+            count = dream.get("log_count", 0) 
+            if count == 0:
+                 count = dream.get("analyzed_entries_count", 0)
+            if count == 0:
+                 # Check metadata (New Standard)
+                 meta = dream.get("metadata", {})
+                 count = meta.get("log_count", 0)
             
             # --- HYBRID MEMORY SUPPORT (JSON + Chroma) ---
             # New format uses "content", Legacy uses "insights"
