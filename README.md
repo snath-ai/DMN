@@ -26,6 +26,21 @@ Standard "Glass Box" agents are tools: they wait for input, execute, and return 
 
 The system is split into two distinct processes (Bicameralism), bridging the Fast (Conscious) and Slow (Subconscious) hemispheres.
 
+```mermaid
+graph TD
+    User -->|Chat| Thalamus
+    Thalamus -->|Feeling| Amygdala
+    Thalamus -->|Context| Hippocampus
+    Thalamus -->|Reasoning| Cortex(LLMNode)
+    Cortex -->|Response| User
+    
+    subgraph DMN [Default Mode Network]
+        Cortex -.->|Logs| STM[Short Term Memory]
+        STM -->|Idle Trigger| Dreamer
+        Dreamer -->|Consolidation| Hippocampus
+    end
+```
+
 ### 1. The Thalamus (The Gateway)
 **Type**: Input Router / Prompt Engineer
 **Function**:
