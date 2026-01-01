@@ -424,7 +424,7 @@ with tab2:
                      break
             # Now 'insights' should be the actual payload (List, String, or Dict)
             
-            with st.expander(f"🌙 Dream at {ts} (Analyzed {count} memories)", expanded=True):
+            with st.expander(f"🌙 Dream at {ts} (Synthesized from {count} interactions)", expanded=True):
                 # Always show raw data option for debugging
                 # Always show raw data option for debugging
                 # Checkbox used because nested expanders are not allowed in Streamlit
