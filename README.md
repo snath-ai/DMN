@@ -6,8 +6,11 @@
   <a href="https://github.com/snath-ai/lar">
     <img alt="Based on" src="https://img.shields.io/badge/Variant%20of-Lár%20Engine-blue?style=for-the-badge">
   </a>
-   <a href="https://github.com/snath-ai/DMN">
+  <a href="https://github.com/snath-ai/DMN">
     <img alt="Architecture" src="https://img.shields.io/badge/Architecture-Bicameral%20Mind-blueviolet?style=for-the-badge">
+  </a>
+  <a href="https://doi.org/10.5281/zenodo.18175178">
+    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.18175178.svg" alt="DOI">
   </a>
 </p>
 
