@@ -1,0 +1,23 @@
+cff-version: 1.2.0
+message: "If you use this software or architecture in your research, please cite it as follows."
+authors:
+  - family-names: "Sajeev"
+    given-names: "Aadithya Vishnu"
+    orcid: "https://orcid.org/0000-0000-0000-0000" # Placeholder or remove if unknown, keeping generic for now
+title: "Lár DMN: A Bicameral Cognitive Architecture for Asynchronous Memory Consolidation"
+version: 1.0.0
+date-released: 2026-01-01
+url: "https://github.com/snath-ai/DMN"
+ignore:
+  - ".git"
+  - ".venv"
+  - "__pycache__"
+keywords:
+  - "artificial intelligence"
+  - "cognitive architecture"
+  - "default mode network"
+  - "memory consolidation"
+  - "autonomous agents"
+  - "bicameralism"
+license: Apache-2.0
+abstract: "A reference implementation of a Bicameral Artificial Intelligence architecture that mimics the human Default Mode Network (DMN). It utilizes a dual-process system ('Fast' Thalamus vs. 'Slow' Dreamer) to enable asynchronous memory consolidation and prevent catastrophic forgetting in Long-Term Memory (LTM) systems."
