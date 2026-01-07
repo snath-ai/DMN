@@ -79,12 +79,12 @@ Implements a "Dual-Write" strategy for robustness:
 
 ## Technical Features (v1.0.0)
 
-### 🎛️ Model Switcher
-Different cognitive tasks require different brains. Lár DMN supports dynamic model switching via the UI:
+### Model Switcher
+Different cognitive tasks require different models. Lár DMN supports dynamic model switching via the UI:
 -   **Conscious Mind (Fast)**: Use a low-latency model (e.g., `llama3.2`) for the chat loop to ensure responsiveness.
 -   **Subconscious Mind (Smart)**: Use a high-reasoning model (e.g., `qwen2.5:14b` or `gpt-4o`) for the Dreaming process, where latency doesn't matter but insight quality does.
 
-### 🐳 Docker Architecture
+### Docker Architecture
 The system is fully containerized:
 -   `lar-awake`: The Streamlit UI and Thalamus (Conscious).
 -   `lar-dreamer`: The Python Daemon and DMN (Subconscious).
