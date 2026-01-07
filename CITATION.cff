@@ -3,15 +3,10 @@ message: "If you use this software or architecture in your research, please cite
 authors:
   - family-names: "Sajeev"
     given-names: "Aadithya Vishnu"
-    orcid: "https://orcid.org/0000-0000-0000-0000" # Placeholder or remove if unknown, keeping generic for now
 title: "Lár DMN: A Bicameral Cognitive Architecture for Asynchronous Memory Consolidation"
-version: 1.0.0
-date-released: 2026-01-01
+version: 1.0.1
+date-released: 2026-01-07
 url: "https://github.com/snath-ai/DMN"
-ignore:
-  - ".git"
-  - ".venv"
-  - "__pycache__"
 keywords:
   - "artificial intelligence"
   - "cognitive architecture"
