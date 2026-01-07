@@ -10,7 +10,7 @@
     <img alt="Architecture" src="https://img.shields.io/badge/Architecture-Bicameral%20Mind-blueviolet?style=for-the-badge">
   </a>
   <a href="https://doi.org/10.5281/zenodo.18175178">
-    <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.18175178.svg" alt="DOI">
+    <img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.18175178-blue?style=for-the-badge" alt="DOI">
   </a>
 </p>
 
