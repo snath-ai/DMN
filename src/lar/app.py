@@ -7,46 +7,15 @@ import sys
 import time
 
 # --- Path Fix for Standalone Run ---
-import sys
-import os
-
-# 1. Identify the Correct Source Path
-# Current file: .../DMN/lar/src/lar/app.py
-# Correct src: .../DMN/lar/src
-current_dir = os.path.dirname(os.path.abspath(__file__))
-project_root = os.path.abspath(os.path.join(current_dir, "..", ".."))
-correct_src_path = os.path.join(project_root, "src")
-
-# 2. Aggressively Clean sys.path
-# Remove any other paths that might contain 'lar' package to avoid conflicts
-# We look for paths ending in 'src' that are NOT our correct path
-paths_to_remove = [p for p in sys.path if p.endswith("src") and os.path.abspath(p) != correct_src_path]
-for p in paths_to_remove:
-    if p in sys.path:
-        sys.path.remove(p)
-
-# 3. Insert Correct Path at the Very Front
-if correct_src_path not in sys.path:
-    sys.path.insert(0, correct_src_path)
-else:
-    # Ensure it is first
-    sys.path.remove(correct_src_path)
-    sys.path.insert(0, correct_src_path)
-
-# 4. Force Unload 'lar' if it point to the wrong location
-if "lar" in sys.modules:
-    import lar
-    if not lar.__file__.startswith(correct_src_path):
-        del sys.modules["lar"]
-        # Also clean submodules
-        keys_to_del = [k for k in sys.modules.keys() if k.startswith("lar.")]
-        for k in keys_to_del:
-            del sys.modules[k]
+# --- Path Fix for Standalone Run ---
+project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", ".."))
+src_path = os.path.join(project_root, "src")
+if src_path not in sys.path:
+    sys.path.insert(0, src_path)
 
 # 5. Import and Verification
 try:
     import lar
-    from lar.dmn_dreamer import dream
     from lar.consciousness_stream import ConsciousnessStream
     from lar.node import LLMNode, GraphState
 except ImportError as e:
@@ -230,6 +199,32 @@ if st.sidebar.button("🛌 Force R.E.M. Sleep"):
         except Exception as e:
             st.error(f"Dream failed: {e}")
 
+st.sidebar.markdown("---")
+if st.sidebar.button("🧹 Wipe Brain (Delete Memory)", type="secondary"):
+    with st.spinner("Erasing neural pathways..."):
+        try:
+            import shutil
+            # Clear Short Term Memory (Logs)
+            if os.path.exists(LOG_FILE):
+                open(LOG_FILE, 'w').close()
+            # Clear Long Term Memory (JSON)
+            if os.path.exists(MEMORY_FILE):
+                with open(MEMORY_FILE, 'w') as f:
+                    json.dump([], f)
+            # Clear ChromaDB Vector Store
+            chroma_path = getattr(st.session_state.brain.hippocampus, "chroma_path", None)
+            if chroma_path and os.path.exists(chroma_path):
+                shutil.rmtree(chroma_path)
+            
+            # Reinitialize the brain with a clean slate
+            st.session_state.brain = Thalamus(log_dir="logs")
+            st.success("Brain successfully wiped. All memories erased.")
+            time.sleep(1)
+            st.cache_data.clear()
+            st.rerun()
+        except Exception as e:
+            st.error(f"Error wiping brain: {e}")
+
 # --- Neural Configuration (Model Switcher) ---
 st.sidebar.markdown("---")
 st.sidebar.subheader("🎛️ Neural Configuration")
@@ -314,9 +309,13 @@ if conscious_model != model_config["conscious_model"] or subconscious_model != m
              target_model = f"ollama/{target_model}"
              
         st.session_state.brain.cortex.model_name = target_model
+        if hasattr(st.session_state.brain, 'prefrontal'):
+             st.session_state.brain.prefrontal.model_name = target_model
+             
         st.toast(f"Brain rewired to {conscious_model}")
         time.sleep(0.5)
         st.rerun()
+
 
 if st.sidebar.button("🔄 Refresh Data"):
     st.cache_data.clear()

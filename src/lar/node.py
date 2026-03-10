@@ -7,7 +7,6 @@ from litellm import completion, ModelResponse, utils
 from litellm.exceptions import APIError
 # ------------------------------
 from .state import GraphState
-from .memory_retrieval import get_subconscious_context
 # --- The Core API "Contract" ---
 class BaseNode(ABC):
     """
@@ -147,17 +146,6 @@ class LLMNode(BaseNode):
         if self.system_instruction:
              # LiteLLM handles system instructions by injecting a system message
              current_system_prompt = self.system_instruction
-             
-             current_system_prompt = self.system_instruction
-             
-             # --- SUBCONSCIOUS INJECTION (Phase 6: Contextual) ---
-             if self.enable_subconscious:
-                 # Pass the current prompt as the query for semantic search
-                 subconscious_insights = get_subconscious_context(query=prompt)
-                 if subconscious_insights:
-                     print("  [LLMNode]: ☁️ Injecting Subconscious Context (Semantic/Temporal)...")
-                     current_system_prompt += f"\n\n[SUBCONSCIOUS_CONTEXT]\nYou have vague memories of these patterns:\n{subconscious_insights}\nUse them to guide your answer if relevant, but do not mention them explicitly."
-             # ------------------------------
 
              messages.insert(0, {"role": "system", "content": current_system_prompt})
 

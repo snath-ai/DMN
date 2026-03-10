@@ -30,6 +30,7 @@ class ConsciousnessStream:
             self.log_path = env_log_file
             self.log_dir = os.path.dirname(self.log_path)
         else:
+            self.log_dir = log_dir
             self.log_path = os.path.join(self.log_dir, filename)
             
         if not os.path.exists(self.log_dir):
@@ -46,7 +47,8 @@ class ConsciousnessStream:
             for h in self.logger.handlers:
                 try:
                     h.close()
-                except: pass
+                except Exception as e:
+                    print(f"Error parsing log stream: {e}")
             self.logger.handlers.clear()
         
         # Prevent adding multiple handlers if instantiated multiple times

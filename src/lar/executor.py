@@ -153,10 +153,7 @@ class GraphExecutor:
             history.append(log_entry)
             yield log_entry
             
-            
-            '''# 7. Yield the log of this step and pause
-            yield log_entry '''
-            
+
             # 8. Resume on the next call
             current_node = next_node
             step_index += 1

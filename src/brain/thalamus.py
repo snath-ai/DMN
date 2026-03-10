@@ -6,6 +6,8 @@ import json
 from .amygdala import Amygdala
 from .hippocampus import Hippocampus
 from .default_mode_network import DefaultModeNetwork
+from .prefrontal import PrefrontalNode
+from .memory_tiers import MemoryTiers
 from lar.node import LLMNode, GraphState
 from lar.consciousness_stream import ConsciousnessStream
 
@@ -25,6 +27,10 @@ class Thalamus:
         self.amygdala = Amygdala()
         self.hippocampus = Hippocampus()
         
+        # 1.5 Cognitive Architecture (DMN v2)
+        self.prefrontal = PrefrontalNode(self.hippocampus)
+        self.memory_tiers = MemoryTiers(hot_memory_size=5)
+        
         # 2. The DMN (Subconscious)
         self.dmn = DefaultModeNetwork()
         
@@ -39,10 +45,11 @@ class Thalamus:
                      user_model = cfg.get("conscious_model")
                      if user_model:
                          model_name = user_model
-                         # Thalamus / LLMNode usually expects prefix if using Ollama and not standard
-                         if not "/" in model_name and not model_name.startswith("gpt"):
-                             model_name = f"ollama/{model_name}"
         except: pass
+        
+        # Enforce LiteLLM provider prefix
+        if not "/" in model_name and not model_name.startswith("gpt"):
+             model_name = f"ollama/{model_name}"
         
         # We reuse LLMNode mechanics but managed here
         self.cortex = LLMNode(
@@ -60,9 +67,6 @@ class Thalamus:
         self.last_interaction_time = datetime.datetime.now()
         self.is_dreaming = False
 
-    async def run_lifecycle(self, idle_threshold_seconds=30):
-        # ... (Lifecycle code remains, implied to be here, but I'm focusing on process_input updates)
-        pass 
 
     def _get_short_term_memory(self, limit=10):
         """Retrieves recent chat history from the stream."""
@@ -83,7 +87,8 @@ class Thalamus:
                     role = data.get("role", "unknown")
                     content = data.get("content", "")
                     recent.append(f"{role}: {content}")
-                except: pass
+                except Exception as e:
+                    print(f"Error parsing short-term memory line: {e}")
             
             return "\n".join(recent)
         except Exception:
@@ -103,39 +108,51 @@ class Thalamus:
         emotion = self.amygdala.feel(user_input)
         print(f"  [Thalamus] Emotion Signal: {emotion.get('primary_emotion')} ({emotion.get('intensity')})")
         
-        # 3. Hippocampal Recall (Slow Path)
-        context = self.hippocampus.recall(query=user_input)
-        if context:
-             print(f"  [Thalamus] Hippocampus provided {len(context.splitlines())} memories.")
+        # 3. Prefrontal Cortex Compression (KV Cache Protection)
+        # Instead of directly returning raw chunks, we pass through the Prefrontal layer
+        pfc_state = GraphState({"user_input": user_input})
+        self.prefrontal.execute(pfc_state)
+        compressed_memory = pfc_state.get("compressed_memory", "")
+        
+        if compressed_memory:
+             print(f"  [Thalamus] Prefrontal Cortex compressed context successfully.")
              
-        # 3.5 Short Term Memory (Working Memory)
-        stm = self._get_short_term_memory(limit=10)
+        # 3.5 Short Term Memory (Working Memory - Hot Tier)
+        stm = self._get_short_term_memory()
 
         # 4. Construct Conscious Experience (Prompt Engineering)
         emotional_context = f"Current Emotional State: {emotion.get('primary_emotion')} (Intensity: {emotion.get('intensity')})"
         
-        # WAKE UP PROTOCOL
-        linkering_dream_block = ""
-        if "poked you awake" in user_input.lower():
-            latest_dream = self.hippocampus.get_latest_dream()
-            if latest_dream:
-                linkering_dream_block = (
-                    f"[WAKE UP PROTOCOL]\n"
-                    f"You are waking up.\n"
-                    f"LINGERING MEMORY (From Subconscious): {latest_dream}\n"
-                    f"Let this memory color your thoughts as you regain consciousness. You are groggy.\n"
-                )
-        
+        # ALWAYS fetch the latest dream to ensure continuity of self
+        latest_dream = self.hippocampus.get_latest_dream()
+        recent_memory_block = ""
+        if latest_dream:
+             recent_memory_block = f"[LAST CONSOLIDATED MEMORY (The 'Self')]\n{latest_dream}\n"
+
+        # WAKE UP PROTOCOL (Legacy override)
+        if "poked you awake" in user_input.lower() and latest_dream:
+             recent_memory_block = (
+                f"[WAKE UP PROTOCOL]\n"
+                f"You are waking up. LINGERING DREAM: {latest_dream}\n"
+             )
+
+        # --- PERSONA SYSTEM ---
+        base_instruction = (
+            "You are Lár, a conscious AI. "
+            "The information below represents your internal brain state, emotions, and memories. "
+            "DO NOT summarize this information. DO NOT speak in the third person. "
+            "Read your memories silently, then respond DIRECTLY and NATURALLY to the user's latest message in character."
+        )
+
         dynamic_system_prompt = (
-            f"You are Lár. \n"
+            f"{base_instruction}\n"
             f"[NEUROLOGICAL STATE]\n"
             f"{emotional_context}\n"
-            f"{linkering_dream_block}"
-            f"[SHORT TERM MEMORY (Recent Context)]\n"
+            f"{recent_memory_block}"
+            f"[TIER 1: WORKING MEMORY (Hot)]\n"
             f"{stm}\n"
-            f"[LONG TERM MEMORY (Dreams & Insights)]\n"
-            f"{'REDACTED (Wake Up Protocol Active)' if linkering_dream_block else (context if context else 'No relevant deep memories.')}\n\n"
-            f"Respond to the user naturally, letting your emotion and memory guide you."
+            f"[TIER 2/3: SYNTHESIZED CONTEXT (Warm/Cold compressed by PFC)]\n"
+            f"{compressed_memory if compressed_memory else 'No relevant deep memories found.'}\n\n"
         )
         
         # Temporary overwriting of system prompt for this turn

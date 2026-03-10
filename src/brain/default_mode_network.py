@@ -61,9 +61,11 @@ class DefaultModeNetwork:
 
     def _get_embedding(self, text: str) -> list:
         try:
+            # Always use a consistent embedding model across all services to prevent dimension mismatch
+            embed_model = "llama3.2"
             response = requests.post(
                 OLLAMA_URL_EMBED,
-                json={"model": DEFAULT_MODEL, "prompt": text}
+                json={"model": embed_model, "prompt": text}
             )
             if response.status_code == 200:
                 return response.json().get("embedding", [])
@@ -83,7 +85,8 @@ class DefaultModeNetwork:
                     content = f.read()
                     if content.strip():
                         dreams = json.loads(content)
-            except: pass
+            except Exception as e:
+                print(f"Error parsing existing dream content: {e}")
         
         dreams.append(dream_data)
         os.makedirs(os.path.dirname(self.dreams_path), exist_ok=True)
@@ -99,7 +102,8 @@ class DefaultModeNetwork:
                         content = f.read()
                         if content.strip():
                             vectors = json.loads(content)
-                 except: pass
+                 except Exception as e:
+                     print(f"Error parsing existing vector content: {e}")
             
             vectors.append(embedding_data)
             with open(self.vectors_path, "w") as f:
@@ -142,23 +146,23 @@ class DefaultModeNetwork:
             conversation_text += f"[{timestamp}] {role}: {content}\n"
 
         system_prompt = (
-        "TASK: DATA ARCHIVAL.\n"
-        "CONTEXT: You are a database process archiving a chat session.\n"
-        "INSTRUCTION: Read the transcript below and generating a short summary paragraph of the events.\n"
+        "TASK: EXTRACT SEMANTIC INSIGHT.\n"
+        "INSTRUCTION: Read the chat transcript below and extract the core topics, facts, and emotional shifts into a single, dense paragraph.\n"
         "RULES:\n"
-        "1. Use THIRD PERSON only (e.g. 'The user asked about...', 'The assistant replied...').\n"
-        "2. Do NOT act as a chatbot. Do NOT use 'I' or 'Me'.\n"
-        "3. Focus on the TOPICS and EMOTIONS discussed.\n"
-        "4. Output the summary as a single plain text paragraph.\n"
+        "1. Write strictly in the third person (e.g., 'The user discussed...', 'The agent noted...').\n"
+        "2. Output ONLY the summary paragraph. No headings. No intro. No 'FINAL OUTPUT'. No 'CONCLUSION'.\n"
+        "3. Do not act as a conversational bot. You are a silent synthesis engine.\n"
+        "4. Keep it concise, omitting trivial pleasantries.\n"
     )    
         # Use clear separators to prevent chat completion
-        full_prompt = f"### SYSTEM INSTRUCTIONS ###\n{system_prompt}\n\n### TRANSCRIPT DATA ###\n{conversation_text}\n### ARCHIVAL SUMMARY ###\n"
+        full_prompt = f"{system_prompt}\n\n[TRANSCRIPT START]\n{conversation_text}\n[TRANSCRIPT END]\n\nSYNTHESIS:"
 
         # Debug Logging
         try:
             with open("logs/dmn_prompts.log", "a") as f:
                 f.write(f"\n\n--- [TIMESTAMP] ---\nPrompt:\n{full_prompt}\n")
-        except: pass
+        except Exception as e:
+             print(f"Error logging prompt: {e}")
 
         try:
             response = requests.post(
@@ -178,7 +182,8 @@ class DefaultModeNetwork:
             try:
                 with open("logs/dmn_prompts.log", "a") as f:
                     f.write(f"Response:\n{raw_output}\n-------------------\n")
-            except: pass
+            except Exception as e:
+                 print(f"Error logging response: {e}")
             
             # Manually wrap in JSON structure for consistency with storage
             # Fallback if empty
@@ -201,7 +206,7 @@ class DefaultModeNetwork:
             
             # --- SAVE MEMORY (Hybrid: Chroma + JSON) ---
             if self.hippocampus:
-                print(f"💾 [DMN] Saving to Vector Brain (Hippocampus)...")
+                print(f"💾 [DMN] Saving to Vector Brain (Hippocampus Cold Storage)...")
                 metadata = {
                     "source": "dreamer", 
                     "timestamp": ts,
@@ -213,6 +218,34 @@ class DefaultModeNetwork:
                     embedding=embedding,
                     metadata=metadata
                 )
+                
+                # --- SECONDARY COMPRESSION PASS (Warm Memory) ---
+                print(f"🧠 [DMN] Performing secondary compression for PFC integration...")
+                warm_prompt = f"Synthesize this dream into a single dense summary sentence focusing on meaning and strategy: {insight_text_block}"
+                
+                try:
+                    warm_res = requests.post(
+                        OLLAMA_URL_GENERATE,
+                        json={
+                            "model": current_model,
+                            "prompt": warm_prompt,
+                            "stream": False,
+                            "format": ""
+                        }
+                    )
+                    warm_res.raise_for_status()
+                    warm_output = warm_res.json().get("response", "").strip()
+                    
+                    if warm_output:
+                        warm_emb = self._get_embedding(warm_output)
+                        self.hippocampus.save_warm_memory(
+                            text=warm_output,
+                            embedding=warm_emb,
+                            metadata={"timestamp": ts, "type": "warm_summary", "source": "dreamer_compression"}
+                        )
+                except Exception as we:
+                    print(f"⚠️ [DMN] Warm Memory Compression Warning: {we}")
+                    
             else:
                 # Legacy Fallback
                 print(f"💾 [DMN] Saving to Legacy JSON (No Hippocampus)...")
