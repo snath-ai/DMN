@@ -8,16 +8,22 @@ Lár is not a chatbot. It is a **Persistent Identity System** running on a "Bica
 ```mermaid
 graph TD
     User((User)) <-->|Chat & Emotion| Awake[Service A: Awake]
-    Awake -->|Write Logs| STM[(Short Term Memory)]
+    Awake -->|Write Logs| STM[(Short Term Memory / Tier 1 Hot)]
     
     subgraph "The Brain (Shared Volume)"
         STM
-        LTM[(Long Term Memory)]
+        WarmMemory[(Warm Memory / Tier 2)]
+        Hippo[(Hippocampus / Tier 3 Cold)]
     end
     
     Dreamer[Service B: Dreamer] -->|Read Logs| STM
-    Dreamer -->|Consolidate Insights| LTM
-    LTM -->|Retrieve Context| Awake
+    Dreamer -->|Pass 1: Dream Narrative| Hippo
+    Dreamer -->|Pass 2: Compression| PrefrontalCortex2[Warm Compressor]
+    PrefrontalCortex2 -->|Compressed Summary| WarmMemory
+    
+    Hippo -->|Raw Chunks| PrefrontalCortex[Prefrontal Cortex]
+    WarmMemory -->|Semantic Summary| PrefrontalCortex
+    PrefrontalCortex -->|Compressed Synthesis| Thalamus[Thalamus / Awake]
 ```
 
 ## Service A: "The Awake Mind" (Conscious)
@@ -42,15 +48,20 @@ graph TD
 ## The Data Layer (Shared Brain)
 Both services share a single Docker Volume mounted at `/data`.
 
-1.  **Short Term Memory (`short_term_memory.jsonl`)**:
-    *   A raw stream of every keystroke and emotion.
-    *   Written by: Awake.
+1.  **Tier 1: Hot Memory (`interaction_stream.jsonl`)**:
+    *   A raw stream of every keystroke, injected directly for immediate context.
+    *   Written by: Awake (Thalamus).
     *   Read by: Dreamer.
 
-2.  **Long Term Memory (`long_term_insights.json`)**:
-    *   A collection of consolidated "dreams" (summaries).
+2.  **Tier 2: Warm Memory (ChromaDB `warm_memory`)**:
+    *   A collection of secondary compressed summaries generated during sleep.
+    *   Written by: Dreamer (Prefrontal Compression Pass).
+    *   Read by: Prefrontal Cortex (Awake) for fast semantic checks.
+
+3.  **Tier 3: Cold Memory (ChromaDB `long_term_memory` & `dreams.json`)**:
+    *   Massive chronological and narrative chunks.
     *   Written by: Dreamer.
-    *   Read by: Awake (to answer "Do you remember...?").
+    *   Read by: Prefrontal Cortex (Awake) for deep compression before hitting the system prompt.
 
 ## Hardware Requirements
 This architecture is optimized for **Apple Silicon (M1/M2/M3)** with **16GB+ RAM**.

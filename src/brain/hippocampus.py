@@ -152,6 +152,19 @@ class Hippocampus:
         except:
             return ""
 
+    def _generate_embedding(self, text: str) -> List[float]:
+        import requests
+        url = f"{OLLAMA_HOST}/api/embeddings"
+        try:
+            # We explicitly hardcode 'llama3.2' for embeddings to prevent dimension mismatches
+            # in ChromaDB if the user swaps the cognitive model to Qwen or GPT-4.
+            res = requests.post(url, json={"model": "llama3.2", "prompt": text})
+            res.raise_for_status()
+            return res.json().get("embedding")
+        except Exception as e:
+            print(f"❌ [Hippocampus] Embedding Generation Error: {e}")
+            return None
+
     def recall(self, query: str = None, max_memories: int = 10) -> str:
         """
         Retrieves context from Cold Memory via ChromaDB.
