@@ -187,7 +187,7 @@ class Hippocampus:
                 # Chroma returns {'documents': [[doc1, doc2]], 'ids': ...}
                 docs = results.get('documents', [[]])[0]
                 if docs:
-                    return "\\n".join([f"- {d}" for d in docs])
+                    return "\n".join([f"- {d}" for d in docs])
             except Exception as e:
                 print(f"⚠️ [Hippocampus] Recall Error: {e}")
         
@@ -211,7 +211,7 @@ class Hippocampus:
             
             docs = results.get('documents', [[]])[0]
             if docs:
-                return "\\n".join([f"- {d}" for d in docs])
+                return "\n".join([f"- {d}" for d in docs])
         except Exception as e:
             print(f"⚠️ [Hippocampus] Warm Recall Error: {e}")
             

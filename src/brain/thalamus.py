@@ -45,7 +45,8 @@ class Thalamus:
                      user_model = cfg.get("conscious_model")
                      if user_model:
                          model_name = user_model
-        except: pass
+        except Exception as e:
+            print(f"⚠️ [Thalamus] Config load error: {e}")
         
         # Enforce LiteLLM provider prefix
         if not "/" in model_name and not model_name.startswith("gpt"):
