@@ -159,6 +159,7 @@ class DefaultModeNetwork:
 
         # Debug Logging
         try:
+            os.makedirs("logs", exist_ok=True)
             with open("logs/dmn_prompts.log", "a") as f:
                 f.write(f"\n\n--- [TIMESTAMP] ---\nPrompt:\n{full_prompt}\n")
         except Exception as e:
@@ -180,6 +181,7 @@ class DefaultModeNetwork:
 
             # Debug Response
             try:
+                os.makedirs("logs", exist_ok=True)
                 with open("logs/dmn_prompts.log", "a") as f:
                     f.write(f"Response:\n{raw_output}\n-------------------\n")
             except Exception as e:
