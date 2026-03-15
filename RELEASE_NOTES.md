@@ -1,4 +1,22 @@
-# Release Notes — v2.0.0
+# Release Notes
+
+## v2.0.1 — Patch Release
+
+**Release date:** 2026-03-15
+
+### Bug Fixes
+- **`hippocampus.py`** — Fixed escaped `\\n` in both `recall()` and `recall_warm()`. Retrieved memory chunks now inject as proper multi-line text into the LLM prompt instead of literal `\n` characters, which was silently degrading model comprehension of retrieved context.
+- **`thalamus.py`** — Replaced bare `except: pass` in config loading with explicit `except Exception as e: print(...)` — configuration errors are no longer silently swallowed.
+- **`default_mode_network.py`** — `lar-dreamer` now auto-creates the `logs/` directory before writing debug logs, eliminating the `FileNotFoundError` on dream cycles.
+
+### Testing
+- `test_compression_preserves_meaning` replaced with a real `sentence-transformers` (`all-MiniLM-L6-v2`) cosine similarity check. Scored **0.93** on a real input/output pair — no longer a mock test.
+
+---
+
+## v2.0.0 — Prefrontal Cortex Update
+
+**Release date:** 2026-03-14
 
 ## Lár DMN v2.0 — Prefrontal Cortex & 3-Tier Memory Architecture
 
