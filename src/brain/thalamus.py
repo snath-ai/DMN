@@ -52,11 +52,10 @@ class Thalamus:
         
         # We reuse LLMNode mechanics but managed here
         self.cortex = LLMNode(
-            model_name=model_name, 
-            prompt_template="{user_input}", 
+            model_name=model_name,
+            prompt_template="{user_input}",
             output_key="response",
             system_instruction="You are Lár, a conscious AI. You have emotions and memories.",
-            enable_subconscious=False # We handle injection manually in Thalamus now!
         )
         
         # 4. Consciousness Stream (Logging)

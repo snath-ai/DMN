@@ -89,101 +89,80 @@ class GraphExecutor:
         total_tokens = 0
 
         step_index = 0
-        while current_node is not None:
-            node_name = current_node.__class__.__name__
-            state_before = copy.deepcopy(state.get_all())
-            
-            log_entry = {
-                "step": step_index,
-                "node": node_name,
-                "state_before": state_before,
-                "state_diff": {},
-                "run_metadata": {}, 
-                "outcome": "pending"
-            }
-            
-            try:
-                # 2. Enterprise Policy Hook
-                self._check_enterprise_policy(current_node, node_name)
+        try:
+            while current_node is not None:
+                node_name = current_node.__class__.__name__
+                state_before = copy.deepcopy(state.get_all())
 
-                # 3. Execute the node
-                next_node = current_node.execute(state)
-                
-                # Check if the node set an error in the state (graceful error handling)
-                if state.get("last_error"):
-                    log_entry["outcome"] = "error"
-                    log_entry["error"] = state.get("last_error")
-                    # If no error handler (next_node is None/ErrorNode), we consider it a failure step
-                else:
-                    log_entry["outcome"] = "success"
-                
-            except Exception as e:
-                # 3. Handle a critical error
-                print(f"  [GraphExecutor] CRITICAL ERROR in {node_name}: {e}")
-                log_entry["outcome"] = "error"
-                log_entry["error"] = str(e)
-                next_node = None 
-            
-            # 4. Capture the state *after* the node runs
-            state_after = copy.deepcopy(state.get_all())
-            
-             # Extract metadata
-            if "__last_run_metadata" in state_after:
-                metadata = state_after.pop("__last_run_metadata")
-                log_entry["run_metadata"] = metadata
-                
-                # Aggregate tokens if present
-                if metadata and isinstance(metadata, dict):
-                    total_prompt_tokens += metadata.get("prompt_tokens", 0)
-                    total_completion_tokens += metadata.get("output_tokens", 0)
-                    total_tokens += metadata.get("total_tokens", 0)
-            
-            # 5. Clear metadata from the actual state so it doesn't persist
-            state.set("__last_run_metadata", None)
-
-            # 6. Compute the diff (now on the *cleaned* state_after)
-            state_diff = compute_state_diff(state_before, state_after)
-            log_entry["state_diff"] = state_diff
-
-            # 7. Step Output Logging
-            # Log the step metadata
-            pass
-
-            # Add to history and yield
-            history.append(log_entry)
-            yield log_entry
-            
-
-            # 8. Resume on the next call
-            current_node = next_node
-            step_index += 1
-            
-            # --- CIRCUIT BREAKER ---
-            if step_index >= max_steps:
-                print(f"  [GraphExecutor] 🛑 CIRCUIT BREAKER TRIPPED: Exceeded {max_steps} steps.")
-                
-                # Log the termination event
                 log_entry = {
                     "step": step_index,
-                    "node": "CircuitBreaker",
-                    "state_before": {},
-                    "state_diff": {}, 
+                    "node": node_name,
+                    "state_before": state_before,
+                    "state_diff": {},
                     "run_metadata": {},
-                    "outcome": "error",
-                    "error": f"Maximum steps exceeded ({max_steps}). Infinite loop detected."
+                    "outcome": "pending"
                 }
+
+                try:
+                    self._check_enterprise_policy(current_node, node_name)
+                    next_node = current_node.execute(state)
+
+                    if state.get("last_error"):
+                        log_entry["outcome"] = "error"
+                        log_entry["error"] = state.get("last_error")
+                    else:
+                        log_entry["outcome"] = "success"
+
+                except Exception as e:
+                    print(f"  [GraphExecutor] CRITICAL ERROR in {node_name}: {e}")
+                    log_entry["outcome"] = "error"
+                    log_entry["error"] = str(e)
+                    next_node = None
+
+                state_after = copy.deepcopy(state.get_all())
+
+                if "__last_run_metadata" in state_after:
+                    metadata = state_after.pop("__last_run_metadata")
+                    log_entry["run_metadata"] = metadata
+                    if metadata and isinstance(metadata, dict):
+                        total_prompt_tokens += metadata.get("prompt_tokens", 0)
+                        total_completion_tokens += metadata.get("output_tokens", 0)
+                        total_tokens += metadata.get("total_tokens", 0)
+
+                state.set("__last_run_metadata", None)
+
+                state_diff = compute_state_diff(state_before, state_after)
+                log_entry["state_diff"] = state_diff
+
                 history.append(log_entry)
                 yield log_entry
-                break
 
-        # --- AUTO-SAVE LOG ON FINISH ---
-        summary = {
-            "total_steps": step_index,
-            "total_prompt_tokens": total_prompt_tokens,
-            "total_completion_tokens": total_completion_tokens,
-            "total_tokens": total_tokens
-        }
-        self._save_log(history, run_id, summary)
+                current_node = next_node
+                step_index += 1
+
+                if step_index >= max_steps:
+                    print(f"  [GraphExecutor] 🛑 CIRCUIT BREAKER TRIPPED: Exceeded {max_steps} steps.")
+                    log_entry = {
+                        "step": step_index,
+                        "node": "CircuitBreaker",
+                        "state_before": {},
+                        "state_diff": {},
+                        "run_metadata": {},
+                        "outcome": "error",
+                        "error": f"Maximum steps exceeded ({max_steps}). Infinite loop detected."
+                    }
+                    history.append(log_entry)
+                    yield log_entry
+                    break
+
+        finally:
+            summary = {
+                "total_steps": step_index,
+                "total_prompt_tokens": total_prompt_tokens,
+                "total_completion_tokens": total_completion_tokens,
+                "total_tokens": total_tokens
+            }
+            self._save_log(history, run_id, summary)
 
     def save_to_file(self, filename: str, start_node: BaseNode, name: str = "My Agent"):
         """
