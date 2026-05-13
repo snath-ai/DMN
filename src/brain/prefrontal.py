@@ -1,6 +1,6 @@
 import os
 import requests
-from typing import Dict, Any
+from typing import Any, Optional
 
 from lar.node import BaseNode, GraphState
 from .hippocampus import Hippocampus
@@ -19,14 +19,15 @@ class PrefrontalNode(BaseNode):
     Solves KV Cache bloat by compressing 2000+ tokens of raw chunks into a dense ~100 token synthesis.
     """
     
-    def __init__(self, hippocampus: Hippocampus, name: str = "PrefrontalNode"):
+    def __init__(self, hippocampus: Hippocampus, name: str = "PrefrontalNode", next_node: Optional[BaseNode] = None):
         self.hippocampus = hippocampus
         self.model_name = DEFAULT_MODEL
-        
-    def execute(self, state: GraphState) -> GraphState:
+        self.next_node = next_node
+
+    def execute(self, state: GraphState) -> Optional[BaseNode]:
         query = state.get("user_input", "")
         if not query:
-            return state
+            return self.next_node
             
         print(f"🧠 [Prefrontal Cortex] Filtering memories for '{query}'...")
         
@@ -38,7 +39,7 @@ class PrefrontalNode(BaseNode):
         
         if not cold_chunks and not warm_summaries:
             state.set("compressed_memory", "")
-            return state
+            return self.next_node
             
         # 3. Run Compression Prompt
         prompt = f"""
@@ -78,7 +79,6 @@ Output ONLY the synthesis. No preamble.
             
         except Exception as e:
             print(f"⚠️ [Prefrontal Cortex] Compression failed, bypassing: {e}")
-            # Fallback to empty context if compression fails so we don't crash or bloat the context window
             state.set("compressed_memory", "")
-            
-        return state
+
+        return self.next_node
