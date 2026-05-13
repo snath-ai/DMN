@@ -12,35 +12,39 @@ from brain.memory_tiers import MemoryTiers
 def test_hot_memory_rolling_buffer():
     """Test hot_memory_rolling_buffer max length is bounded to 5"""
     tiers = MemoryTiers(hot_memory_size=5)
-    
-    # We will pass a real string representation of a JSONL file
+
+    # Build 10 fake JSONL lines
     mock_log_lines = []
     for i in range(10):
         mock_log_lines.append(f'{{"role": "user", "content": "Message {i}"}}\n')
-        
-    fake_file_content = "".join(mock_log_lines)
-    
+
     with patch("os.path.exists", return_value=True):
-        with patch("builtins.open", return_value=StringIO(fake_file_content)):
+        # Mock open so that f.readlines() returns our list of strings correctly
+        mock_file = MagicMock()
+        mock_file.__enter__ = lambda s: s
+        mock_file.__exit__ = MagicMock(return_value=False)
+        mock_file.readlines.return_value = mock_log_lines
+
+        with patch("builtins.open", return_value=mock_file):
             history = tiers.get_hot_memory("dummy.jsonl")
-            
-            # Should only keep the last 5
-            lines = [l for l in history.split("\\n") if l.strip()]
-            assert len(lines) == 5
+
+            # memory_tiers.py now uses real "\n" – split on actual newlines
+            lines = [l for l in history.split("\n") if l.strip()]
+            assert len(lines) == 5, f"Expected 5 lines, got {len(lines)}: {lines}"
             assert lines[-1] == "user: Message 9"
             assert lines[0] == "user: Message 5"
 
 def test_warm_memory_threshold():
     """Test warm_memory_threshold (similarity > 0.7 only)"""
     hippo = Hippocampus()
-    
+
     with patch.object(hippo, 'warm_collection') as mock_warm:
         # Mock Chroma returning a distance of 0.2 (which is 1 - 0.2 = 0.8 similarity)
         mock_warm.query.return_value = {
             'documents': [["Relevant semantic summary"]],
             'distances': [[0.2]] # > 0.7 similarity threshold
         }
-        
+
         with patch.object(hippo, '_generate_embedding', return_value=[0.1]*3072):
             result = hippo.recall_warm("query")
             assert "Relevant semantic summary" in result
@@ -48,7 +52,7 @@ def test_warm_memory_threshold():
 def test_cold_never_injected_directly():
     """Verify cold memories are not directly injected into context"""
     from brain.thalamus import Thalamus
-    
+
     t = Thalamus()
     with patch.object(t.hippocampus, 'recall', return_value="Massive Cold Chunk"):
         with patch.object(t.hippocampus, 'recall_warm', return_value="Warm Chunk"):
@@ -58,6 +62,6 @@ def test_cold_never_injected_directly():
                     with patch.object(t.prefrontal, 'execute') as mock_pfc:
                         # The thalamus MUST send the chunks to the prefrontal layer, not the main node
                         t.process_input("hello")
-                
+
                 # Verify prefrontal executes
                 assert mock_pfc.called

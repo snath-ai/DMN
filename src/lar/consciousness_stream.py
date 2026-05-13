@@ -48,7 +48,7 @@ class ConsciousnessStream:
                 try:
                     h.close()
                 except Exception as e:
-                    print(f"Error parsing log stream: {e}")
+                    print(f"⚠️ [ConsciousnessStream] Error closing stale handler: {e}")
             self.logger.handlers.clear()
         
         # Prevent adding multiple handlers if instantiated multiple times

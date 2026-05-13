@@ -33,7 +33,7 @@ def export_graph_to_json(
             "changelog": []
         },
         "security": {
-            "allow_env_access": True,
+            "allow_env_access": False,
             "allowed_tools": []
         },
         "graph": {

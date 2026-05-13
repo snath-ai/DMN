@@ -322,7 +322,7 @@ if st.sidebar.button("🔄 Refresh Data"):
     st.rerun()
 
 # --- Main Interface ---
-st.title("Lár v1.0.0: Glass Box Consciousness")
+st.title("Lár v2.0.1: Glass Box Consciousness")
 
 tab1, tab2 = st.tabs(["⚡ Short Term Memory (Consciousness)", "💾 Long Term Memory (Subconscious)"])
 
@@ -503,4 +503,4 @@ with tab2:
 
 # --- Footer ---
 st.sidebar.markdown("---")
-st.sidebar.caption("Lár v1.0.0")
+st.sidebar.caption("Lár v2.0.1")

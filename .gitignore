@@ -49,5 +49,7 @@ htmlcov/
 # Ignore agent audit logs
 lar_logs/
 
-# Runtime Data (Memories, Vectors, Configs)
+# Runtime Data (Memories, Vectors, Configs, Logs)
 data/
+logs/
+memory/

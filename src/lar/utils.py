@@ -48,3 +48,23 @@ def apply_diff(state: dict, diff: dict) -> dict:
     for key, value in diff.get("updated", {}).items():
         new_state[key] = value 
     return new_state
+
+
+def truncate_for_log(data: any, max_length: int = 500) -> str:
+    """Safely stringifies and truncates data for console logging."""
+    if data is None:
+        return "None"
+    if isinstance(data, (dict, list)):
+        try:
+            text = json.dumps(data, indent=2)
+        except (TypeError, OverflowError):
+            text = str(data)
+    else:
+        text = str(data)
+    if len(text) <= max_length:
+        return text
+    suffix = f"... [truncated, total len: {len(text)} chars]"
+    preview_len = max_length - len(suffix)
+    if preview_len < 0:
+        return text[:max_length] + "..."
+    return text[:preview_len] + suffix

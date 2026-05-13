@@ -9,8 +9,8 @@ def summarize_diff(diff: dict) -> str:
         keys = list(diff["added"].keys())
         if "__last_run_metadata" in keys: keys.remove("__last_run_metadata")
         if keys: summary.append(f"[green]Added:[/green] {', '.join(keys)}")
-    if diff.get("modified"): 
-        summary.append(f"[yellow]Modified:[/yellow] {', '.join(list(diff['modified'].keys()))}")
+    if diff.get("updated"):
+        summary.append(f"[yellow]Updated:[/yellow] {', '.join(list(diff['updated'].keys()))}")
     if diff.get("removed"):
         keys = list(diff["removed"].keys())
         if "__last_run_metadata" in keys: keys.remove("__last_run_metadata")
