@@ -142,6 +142,16 @@ Gracefully degrades if ChromaDB or Ollama are unavailable — JEPA execution is 
 
 ---
 
+## EU AI Act Compliance
+
+Lár DMN is structurally designed to support EU AI Act compliance for high-risk systems:
+* **Article 15 (Robustness):** Guarantees long-term behavioral consistency by preventing catastrophic forgetting. Proven heuristics are deterministically recalled, eliminating stochastic hallucination drift over time.
+* **Article 12 (Record-Keeping):** The "Sleep/Dream" memory consolidation cycle executes on the Lár spine, producing cryptographically HMAC-signed audit logs of how memories are formed.
+
+See [EU_AI_ACT_COMPLIANCE.md](EU_AI_ACT_COMPLIANCE.md) for full architectural details.
+
+---
+
 ## Quick Start
 
 ```bash
