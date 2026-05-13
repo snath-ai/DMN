@@ -114,6 +114,7 @@ Solves KV cache bloat. Rather than injecting raw retrieved chunks directly into 
 ## JEPA Integration — World Model Memories
 
 DMN is not limited to LLM conversations. **Lár-JEPA writes JEPA trajectory heuristics directly into the Hippocampus** via `JEPA_DMN_Consolidation_Node`.
+*(Note: Thanks to the newly integrated `TensorSafeEncoder` in the Lár core engine, raw PyTorch and NumPy tensors from JEPAs are now safely serialized and consolidated into the DMN without crashing the graph state.)*
 
 The pattern: after a JEPA world model predicts a trajectory and the `EntropicRouter` returns `COMMIT_TRAJECTORY`, the successful execution trace is written to the DMN episodic store. On the next planning cycle, `recall_heuristics()` retrieves it as warm context — the JEPA doesn't re-explore known-good regions of latent space.
 
