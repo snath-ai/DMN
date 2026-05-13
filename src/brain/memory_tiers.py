@@ -38,7 +38,7 @@ class MemoryTiers:
             
             # Simple text truncation to approximate 200 tokens (~800 chars)
             # if we wanted strict tokenization, we'd use tiktoken, but char limit is fast and deterministic.
-            raw_text = "\\n".join(recent)
+            raw_text = "\n".join(recent)
             if len(raw_text) > 800:
                 return "...[truncated context]..." + raw_text[-750:]
             return raw_text

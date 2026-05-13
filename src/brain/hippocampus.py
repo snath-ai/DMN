@@ -17,6 +17,9 @@ CHROMA_DB_DIR = os.path.join(PROJECT_ROOT, "data", "chroma_db")
 # Ollama Config
 OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 DEFAULT_MODEL = os.environ.get("OLLAMA_MODEL", "llama3.2")
+# Use a dedicated env var for embeddings so swapping the cognitive model
+# (e.g. to qwen2.5) doesn't cause ChromaDB dimension mismatches.
+EMBED_MODEL = os.environ.get("OLLAMA_EMBED_MODEL", "llama3.2")
 
 class Hippocampus:
     """
@@ -156,9 +159,9 @@ class Hippocampus:
         import requests
         url = f"{OLLAMA_HOST}/api/embeddings"
         try:
-            # We explicitly hardcode 'llama3.2' for embeddings to prevent dimension mismatches
+            # We use EMBED_MODEL (configurable via OLLAMA_EMBED_MODEL) to prevent dimension mismatches
             # in ChromaDB if the user swaps the cognitive model to Qwen or GPT-4.
-            res = requests.post(url, json={"model": "llama3.2", "prompt": text})
+            res = requests.post(url, json={"model": EMBED_MODEL, "prompt": text})
             res.raise_for_status()
             return res.json().get("embedding")
         except Exception as e:
@@ -224,7 +227,7 @@ class Hippocampus:
         for d in dreams:
             if "insights" in d and "narrative" in d["insights"]:
                  text.append(d["insights"]["narrative"])
-        return "\\n".join(text)
+        return "\n".join(text)
 
 # Minimal test
 if __name__ == "__main__":

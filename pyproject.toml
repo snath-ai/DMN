@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lar-engine"
-version = "2.0.0"
+version = "2.1.0"
 description = "Lár DMN: A Showcase of Cognitive Architectures (Bicameral Memory, Autopoiesis) built on the Lár Engine."
 authors = ["Aadithya Vishnu Sajeev <axdithya@snath.ai>", "Vinay S <vinay@snath.ai>"]
 maintainers = ["Aadithya Vishnu Sajeev <axdithya@snath.ai>", "Vinay S <vinay@snath.ai>"]
@@ -17,11 +17,15 @@ rich = "^14.2.0"
 google-genai = "^1.50.1"
 openai = "^2.8.1"
 anthropic = "^0.74.1"
-litellm = "^1.80.0"
+litellm = "^1.34.0"
 pydantic = "^2.0.0"
 networkx = "^3.0.0"
 deepdiff = "^8.6.1"
 urllib3 = "^2.6.0"
+chromadb = "^1.4.0"
+streamlit = "^1.32.0"
+requests = "^2.31.0"
+pandas = "^2.2.1"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.2"

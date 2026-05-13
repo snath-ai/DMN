@@ -7,7 +7,6 @@ from .amygdala import Amygdala
 from .hippocampus import Hippocampus
 from .default_mode_network import DefaultModeNetwork
 from .prefrontal import PrefrontalNode
-from .memory_tiers import MemoryTiers
 from lar.node import LLMNode, GraphState
 from lar.consciousness_stream import ConsciousnessStream
 
@@ -29,7 +28,6 @@ class Thalamus:
         
         # 1.5 Cognitive Architecture (DMN v2)
         self.prefrontal = PrefrontalNode(self.hippocampus)
-        self.memory_tiers = MemoryTiers(hot_memory_size=5)
         
         # 2. The DMN (Subconscious)
         self.dmn = DefaultModeNetwork()

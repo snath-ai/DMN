@@ -15,6 +15,8 @@ OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
 OLLAMA_URL_GENERATE = f"{OLLAMA_HOST}/api/generate"
 OLLAMA_URL_EMBED = f"{OLLAMA_HOST}/api/embeddings"
 DEFAULT_MODEL = os.environ.get("OLLAMA_MODEL", "llama3")
+# Dedicated embedding model config — never changes with cognitive model swaps.
+EMBED_MODEL = os.environ.get("OLLAMA_EMBED_MODEL", "llama3.2")
 
 class DefaultModeNetwork:
     """
@@ -61,8 +63,9 @@ class DefaultModeNetwork:
 
     def _get_embedding(self, text: str) -> list:
         try:
-            # Always use a consistent embedding model across all services to prevent dimension mismatch
-            embed_model = "llama3.2"
+            # Use EMBED_MODEL (configurable via OLLAMA_EMBED_MODEL env var) to ensure
+            # consistent embedding dimensions across all services.
+            embed_model = EMBED_MODEL
             response = requests.post(
                 OLLAMA_URL_EMBED,
                 json={"model": embed_model, "prompt": text}
