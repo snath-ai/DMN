@@ -5,17 +5,15 @@ import datetime
 import time
 import uuid
 
-# Configuration
-OLLAMA_URL_GENERATE = "http://localhost:11434/api/generate"
-OLLAMA_URL_EMBED = "http://localhost:11434/api/embeddings"
-DEFAULT_MODEL = "llama3" # Can be overriden or auto-detected
-LOG_FILE = os.path.join("logs", "interaction_stream.jsonl")
-DEFAULT_MODEL = "llama3" # Can be overriden or auto-detected
-LOG_FILE = os.path.join("logs", "interaction_stream.jsonl")
+# Configuration — respect OLLAMA_HOST for Docker / remote deployments
+OLLAMA_HOST = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
+OLLAMA_URL_GENERATE = f"{OLLAMA_HOST}/api/generate"
+OLLAMA_URL_EMBED = f"{OLLAMA_HOST}/api/embeddings"
+DEFAULT_MODEL = os.environ.get("OLLAMA_MODEL", "llama3")
+LOG_FILE = os.environ.get("LOG_FILE", os.path.join("logs", "interaction_stream.jsonl"))
 OLD_MEMORY_FILE = os.path.join("memory", "long_term_insights.json")
 DREAMS_FILE = os.path.join("memory", "dreams.json")
 VECTORS_FILE = os.path.join("memory", "dream_vectors.json")
-MAX_LOG_ENTRIES = 50
 MAX_LOG_ENTRIES = 50
 
 def read_recent_logs(n=50):
@@ -136,15 +134,28 @@ def dream(model="llama3:latest"):
 
     print(f"🧠 [DMN] Reflecting on {len(recent_logs)} interactions...")
     
+    # Sanitize: convert JSON logs to plain-text transcript to prevent prompt injection
+    # (raw JSON inlined into an LLM prompt lets the model mimic JSON structure or follow
+    #  embedded instructions from log content — sanitize to safe flat text first.)
+    conversation_text = ""
+    for log in recent_logs:
+        timestamp = log.get("timestamp", "")
+        role = log.get("role", "unknown")
+        content = log.get("content", "")
+        conversation_text += f"[{timestamp}] {role}: {content}\n"
+
     # Prepare the prompt
-    logs_str = json.dumps(recent_logs, indent=2)
     system_prompt = (
-        "You are the subconscious processing unit. Analyze these recent user interactions. "
-        "Do not summarize them. Instead, identify 3 hidden patterns, contradictions, or unasked questions "
-        "that the user might be exploring. Output ONLY a JSON object with a list of 'insights'."
+        "TASK: IDENTIFY HIDDEN PATTERNS.\n"
+        "INSTRUCTION: Read the chat transcript below. Identify 3 hidden patterns, contradictions, "
+        "or unasked questions the user might be exploring.\n"
+        "RULES:\n"
+        "1. Output ONLY a JSON object with a list of 'insights'.\n"
+        "2. Do not summarize or repeat the transcript.\n"
+        "3. You are a silent synthesis engine, not a conversational bot.\n"
     )
-    
-    full_prompt = f"{system_prompt}\n\nLogs:\n{logs_str}\n\nOutput JSON:"
+
+    full_prompt = f"{system_prompt}\n\n[TRANSCRIPT START]\n{conversation_text}\n[TRANSCRIPT END]\n\nOutput JSON:"
 
     try:
         response = requests.post(

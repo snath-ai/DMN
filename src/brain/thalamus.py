@@ -71,7 +71,7 @@ class Thalamus:
         try:
             # We rely on the stream's log file or internal buffer if we had one
             # Ideally stream class should expose this. For now, read file directly.
-            log_path = self.stream.log_file
+            log_path = self.stream.log_path
             if not os.path.exists(log_path): return ""
             
             with open(log_path, "r") as f:

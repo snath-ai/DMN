@@ -7,7 +7,8 @@ maintainers = ["Aadithya Vishnu Sajeev <axdithya@snath.ai>", "Vinay S <vinay@sna
 license = "Apache-2.0"
 readme = "README.md"
 packages = [
-    { include = "lar", from = "src" }
+    { include = "lar", from = "src" },
+    { include = "brain", from = "src" }
 ]
 
 [tool.poetry.dependencies]

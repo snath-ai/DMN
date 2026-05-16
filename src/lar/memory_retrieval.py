@@ -1,3 +1,14 @@
+# DEPRECATED: This module is superseded by Hippocampus.recall() (src/brain/hippocampus.py).
+# It is no longer imported by any active code path. Retained for reference only.
+# Do not add new callers — use Hippocampus instead.
+import warnings
+warnings.warn(
+    "memory_retrieval.get_subconscious_context() is deprecated. "
+    "Use Hippocampus.recall() from brain.hippocampus instead.",
+    DeprecationWarning,
+    stacklevel=2,
+)
+
 import os
 import json
 import math

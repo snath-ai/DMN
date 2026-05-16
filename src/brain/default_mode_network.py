@@ -6,7 +6,7 @@ import time
 import uuid
 # Add Hippocampus import
 try:
-    from brain.hippocampus import Hippocampus
+    from .hippocampus import Hippocampus
 except ImportError:
     Hippocampus = None
 
@@ -92,7 +92,9 @@ class DefaultModeNetwork:
                 print(f"Error parsing existing dream content: {e}")
         
         dreams.append(dream_data)
-        os.makedirs(os.path.dirname(self.dreams_path), exist_ok=True)
+        dir_part = os.path.dirname(self.dreams_path)
+        if dir_part:
+            os.makedirs(dir_part, exist_ok=True)
         with open(self.dreams_path, "w") as f:
             json.dump(dreams, f, indent=2)
             

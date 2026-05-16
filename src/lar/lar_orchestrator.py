@@ -46,6 +46,9 @@ class LarOrchestrator:
         self.check_interval = check_interval_seconds
         self.is_dreaming = False
         self.last_active_time = time.time()
+        # Track the log file mtime at last dream completion to avoid re-dreaming
+        # the same unmodified log file if the system stays idle indefinitely.
+        self._last_dreamed_mtime: float = 0.0
         
         # Ensure log dir exists just in case
         if not os.path.exists(os.path.dirname(LOG_FILE)):
@@ -72,28 +75,19 @@ class LarOrchestrator:
                 # Calculate time since last activity
                 time_since_active = current_time - last_mod
                 
-                if time_since_active > self.idle_threshold and not self.is_dreaming:
+                if time_since_active > self.idle_threshold and not self.is_dreaming and last_mod != self._last_dreamed_mtime:
                     print(f"💤 [Orchestrator] System idle for {int(time_since_active)}s. Entering Dream State...")
                     self.is_dreaming = True
-                    
-                    # Log event (visually to console, maybe to file if needed)
-                    # We run the synchronous dream() function in a separate thread to not block the loop
+                    dream_mtime_snapshot = last_mod
+
+                    # Run the synchronous dream() in a thread so we don't block the event loop
                     await asyncio.to_thread(dream)
-                    
+
                     print("⏰ [Orchestrator] Waking Up - Insights Integrated.")
+                    # Record the mtime we just processed — prevents re-dreaming the same log
+                    # until new interactions arrive and the mtime advances.
+                    self._last_dreamed_mtime = dream_mtime_snapshot
                     self.is_dreaming = False
-                    
-                    # Update mod time or just wait? 
-                    # If we don't 'touch' the file, it will dream again immediately if threshold is passed.
-                    # We should probably wait until new activity OR sleep for a while.
-                    # Ideally, dreaming itself generates an "insight" log, but that's in memory/ folder, not interactions.
-                    # Let's enforce a "sleep refractory period" or just wait for next loop.
-                    # If the user is STILL away, should it dream again?
-                    # Typically DMN runs continuously. But for this script, maybe once per "long sleep" 
-                    # or repeatedly. Let's let it run again if still idle, but maybe the dreamer itself handles "nothing new to process"?
-                    # Yes, DMN checks recent logs. If it already processed them, it might process same ones again 
-                    # unless DMN logic tracks "last_processed_timestamp". 
-                    # For now, simplistic implementation as requested.
                 
                 elif time_since_active < self.idle_threshold and self.is_dreaming:
                     # User woke up mid-dream? (Not handled deep inside dream, but we can flag it)

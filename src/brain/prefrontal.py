@@ -2,7 +2,8 @@ import os
 import requests
 from typing import Any, Optional
 
-from lar.node import BaseNode, GraphState
+from lar.node import BaseNode
+from lar.state import GraphState
 from .hippocampus import Hippocampus
 
 # Configuration

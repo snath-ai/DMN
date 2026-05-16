@@ -62,11 +62,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Brain Setup (The Neuro-Architecture) ---
-try:
-    from brain.thalamus import Thalamus
-except ImportError:
-    # Fallback if python path is tricky
-    from src.brain.thalamus import Thalamus
+from brain.thalamus import Thalamus
 
 if "brain" not in st.session_state:
     st.session_state.brain = Thalamus(log_dir="logs")
