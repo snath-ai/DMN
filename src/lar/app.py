@@ -5,6 +5,7 @@ import os
 import datetime
 import sys
 import time
+import threading
 
 # --- Path Fix for Standalone Run ---
 # --- Path Fix for Standalone Run ---
@@ -62,10 +63,25 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # --- Brain Setup (The Neuro-Architecture) ---
-from brain.thalamus import Thalamus
+try:
+    from brain.thalamus import Thalamus
+    from brain.autonomic_system import AutonomicNervousSystem
+except ImportError as e:
+    st.error(f"Brain import failed: {e}\nPaths: {sys.path}")
+    st.stop()
 
 if "brain" not in st.session_state:
     st.session_state.brain = Thalamus(log_dir="logs")
+
+# Start the AutonomicNervousSystem as a background daemon thread (once per process).
+# It shares the Thalamus's DMN so all brain regions use the same Hippocampus/ChromaDB.
+# daemon=True means it exits automatically when the Streamlit process exits.
+if "ans_thread" not in st.session_state:
+    ans = AutonomicNervousSystem(dmn=st.session_state.brain.dmn)
+    ans_thread = threading.Thread(target=ans.run, daemon=True, name="AutonomicNervousSystem")
+    ans_thread.start()
+    st.session_state.ans_thread = ans_thread
+    st.session_state.ans = ans
 
 # --- Helpers ---
 def load_logs():
@@ -280,8 +296,14 @@ if conscious_model != model_config["conscious_model"] or subconscious_model != m
         "conscious_model": conscious_model,
         "subconscious_model": subconscious_model
     }
-    with open(CONFIG_PATH, "w") as f:
-        json.dump(new_config, f)
+    try:
+        config_dir = os.path.dirname(CONFIG_PATH)
+        if config_dir:
+            os.makedirs(config_dir, exist_ok=True)
+        with open(CONFIG_PATH, "w") as f:
+            json.dump(new_config, f)
+    except (OSError, PermissionError) as e:
+        st.sidebar.warning(f"⚠️ Could not persist model config ({e}). Model updated for this session only.")
     
     # Live update the running brain
     if "brain" in st.session_state:

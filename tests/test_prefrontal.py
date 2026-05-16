@@ -38,8 +38,12 @@ def test_compression_preserves_meaning():
     Semantic similarity between input chunks and PFC output > 0.8.
     Uses sentence-transformers (all-MiniLM-L6-v2) to compute real embeddings
     rather than hand-crafted mock vectors, making this test credible to reviewers.
+    Skipped automatically if sentence_transformers is not in the environment.
     """
-    from sentence_transformers import SentenceTransformer, util
+    # pytest.importorskip skips the test (not fails) if the package is absent.
+    st_lib = pytest.importorskip("sentence_transformers", reason="sentence_transformers not installed")
+    SentenceTransformer = st_lib.SentenceTransformer
+    util = st_lib.util
 
     model = SentenceTransformer("all-MiniLM-L6-v2")
 

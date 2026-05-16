@@ -50,18 +50,24 @@ def test_warm_memory_threshold():
             assert "Relevant semantic summary" in result
 
 def test_cold_never_injected_directly():
-    """Verify cold memories are not directly injected into context"""
+    """Verify cold memories are not directly injected into context — PFC must gate them."""
     from brain.thalamus import Thalamus
 
-    t = Thalamus()
+    # Patch ChromaDB at construction time so Thalamus() never opens a real DB.
+    with patch("brain.hippocampus.chromadb.PersistentClient") as mock_chroma:
+        mock_collection = MagicMock()
+        mock_chroma.return_value.get_or_create_collection.return_value = mock_collection
+
+        t = Thalamus()
+
     with patch.object(t.hippocampus, 'recall', return_value="Massive Cold Chunk"):
         with patch.object(t.hippocampus, 'recall_warm', return_value="Warm Chunk"):
-            with patch.object(t.amygdala, 'feel', return_value={"primary_emotion": "neutral", "intensity": 0}):
-                with patch.object(t.cortex, 'execute', return_value=None):
-                    # Execute thalamus routing
-                    with patch.object(t.prefrontal, 'execute') as mock_pfc:
-                        # The thalamus MUST send the chunks to the prefrontal layer, not the main node
-                        t.process_input("hello")
+            with patch.object(t.hippocampus, 'get_latest_dream', return_value=None):
+                with patch.object(t.amygdala, 'feel', return_value={"primary_emotion": "neutral", "intensity": 0}):
+                    with patch.object(t.cortex, 'execute', return_value=None):
+                        with patch.object(t.stream, 'log_interaction', return_value=None):
+                            with patch.object(t.prefrontal, 'execute') as mock_pfc:
+                                t.process_input("hello")
 
-                # Verify prefrontal executes
-                assert mock_pfc.called
+    # The Thalamus MUST route chunks through PFC, not inject cold memory directly
+    assert mock_pfc.called

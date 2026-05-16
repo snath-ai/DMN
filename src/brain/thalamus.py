@@ -29,8 +29,9 @@ class Thalamus:
         # 1.5 Cognitive Architecture (DMN v2)
         self.prefrontal = PrefrontalNode(self.hippocampus)
         
-        # 2. The DMN (Subconscious)
-        self.dmn = DefaultModeNetwork()
+        # 2. The DMN (Subconscious) — share the same Hippocampus so all brain
+        #    regions read/write the same ChromaDB collection (no orphaned client).
+        self.dmn = DefaultModeNetwork(hippocampus=self.hippocampus)
         
         # 3. The Neocortex (Executive)
         # Load Model Config
@@ -165,10 +166,14 @@ class Thalamus:
         # Restore prompt
         self.cortex.system_instruction = original_prompt
         
+        # Guard: LLMNode sets response only on success; None means the call failed.
+        if response is None:
+            response = "⚠️ [Lár] Cortex is unreachable. Check that Ollama is running."
+
         # 6. Motor Output & Log
         latency = (time.time() - start) * 1000
         self.stream.log_interaction(session_id, "assistant", response, metadata={"latency_ms": latency, "emotion": emotion})
-        
+
         return response
 
     async def run_lifecycle(self, idle_threshold_seconds=30):
