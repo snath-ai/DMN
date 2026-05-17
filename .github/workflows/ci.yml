@@ -1,0 +1,56 @@
+name: CI — lar-dmn
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    name: Test (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      # 1. Checkout this repo (lar-dmn / DMN)
+      - name: Checkout lar-dmn
+        uses: actions/checkout@v4
+        with:
+          path: DMN
+
+      # 2. Checkout lar-engine (path dep resolution in CI)
+      - name: Checkout lar-engine
+        uses: actions/checkout@v4
+        with:
+          repository: snath-ai/lar
+          path: lar
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - uses: snok/install-poetry@v1
+        with:
+          virtualenvs-create: true
+          virtualenvs-in-project: true
+
+      # 3. Install lar-engine first (editable, resolves the path dep)
+      - name: Install lar-engine
+        run: pip install -e lar/
+
+      # 4. Install lar-dmn with dev deps
+      - name: Install lar-dmn
+        run: |
+          cd DMN
+          poetry install --no-interaction --with dev
+
+      # 5. Run tests
+      - name: Run tests
+        run: |
+          cd DMN
+          poetry run pytest tests/ -v

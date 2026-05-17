@@ -1,0 +1,78 @@
+name: Publish lar-dmn to GitHub Packages
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build_and_test:
+    name: Build & Test
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout lar-dmn
+        uses: actions/checkout@v4
+        with:
+          path: DMN
+
+      - name: Checkout lar-engine (path dep)
+        uses: actions/checkout@v4
+        with:
+          repository: snath-ai/lar
+          path: lar
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - uses: snok/install-poetry@v1
+        with:
+          version: 1.8.2
+
+      - name: Install lar-engine
+        run: pip install -e lar/
+
+      - name: Install lar-dmn + dev deps
+        run: |
+          cd DMN
+          poetry install --sync --with dev
+
+      - name: Run tests
+        run: |
+          cd DMN
+          poetry run pytest tests/ -v
+
+      - name: Build wheel + sdist
+        run: |
+          cd DMN
+          poetry build
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lar-dmn-dist
+          path: DMN/dist/
+
+  publish:
+    name: Publish to GitHub Packages
+    needs: build_and_test
+    runs-on: ubuntu-latest
+    environment:
+      name: github-packages
+      url: https://github.com/snath-ai/DMN/packages
+
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: lar-dmn-dist
+          path: dist/
+
+      - name: Publish to GitHub Packages PyPI registry
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          repository-url: https://pypi.pkg.github.com/snath-ai/
+          password: ${{ secrets.GITHUB_TOKEN }}
