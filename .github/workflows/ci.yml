@@ -5,6 +5,8 @@ on:
     branches: [main]
   pull_request:
     branches: [main]
+  repository_dispatch:
+    types: [lar-engine-updated]
 
 jobs:
   test:
@@ -50,3 +52,19 @@ jobs:
         run: |
           cd Lar_Main/DMN/lar
           poetry run pytest tests/ -v
+
+  dispatch:
+    name: Trigger lar-jepa CI
+    needs: test
+    if: >
+      (github.event_name == 'push' && github.ref == 'refs/heads/main') ||
+      github.event_name == 'repository_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch lar-jepa CI
+        run: |
+          curl -s -o /dev/null -w "%{http_code}" -X POST \
+            -H "Authorization: Bearer ${{ secrets.CROSS_REPO_TOKEN }}" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/snath-ai/Lar-JEPA/dispatches \
+            -d '{"event_type":"lar-dmn-updated"}'
