@@ -1,11 +1,11 @@
-name: Publish lar-dmn to GitHub Packages
+name: Publish lar-dmn
 
 on:
   release:
     types: [published]
 
 permissions:
-  contents: read
+  contents: write
   packages: write
 
 jobs:
@@ -19,7 +19,7 @@ jobs:
         with:
           path: DMN
 
-      - name: Checkout lar-engine (path dep)
+      - name: Checkout lar-engine
         uses: actions/checkout@v4
         with:
           repository: snath-ai/lar
@@ -58,12 +58,9 @@ jobs:
           path: DMN/dist/
 
   publish:
-    name: Publish to GitHub Packages
+    name: Attach wheel to GitHub Release
     needs: build_and_test
     runs-on: ubuntu-latest
-    environment:
-      name: github-packages
-      url: https://github.com/snath-ai/DMN/packages
 
     steps:
       - uses: actions/download-artifact@v4
@@ -71,8 +68,7 @@ jobs:
           name: lar-dmn-dist
           path: dist/
 
-      - name: Publish to GitHub Packages PyPI registry
-        uses: pypa/gh-action-pypi-publish@release/v1
+      - name: Upload wheel + sdist to Release
+        uses: softprops/action-gh-release@v2
         with:
-          repository-url: https://pypi.pkg.github.com/snath-ai/
-          password: ${{ secrets.GITHUB_TOKEN }}
+          files: dist/*
