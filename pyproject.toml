@@ -1,18 +1,18 @@
 [tool.poetry]
-name = "lar-engine"
+name = "lar-dmn"
 version = "2.1.0"
-description = "Lár DMN: A Showcase of Cognitive Architectures (Bicameral Memory, Autopoiesis) built on the Lár Engine."
+description = "Lár DMN: Cognitive Architecture (Bicameral Memory, Autopoiesis) built on the Lár Engine."
 authors = ["Aadithya Vishnu Sajeev <axdithya@snath.ai>", "Vinay S <vinay@snath.ai>"]
 maintainers = ["Aadithya Vishnu Sajeev <axdithya@snath.ai>", "Vinay S <vinay@snath.ai>"]
 license = "Apache-2.0"
 readme = "README.md"
 packages = [
-    { include = "lar", from = "src" },
     { include = "brain", from = "src" }
 ]
 
 [tool.poetry.dependencies]
 python = "^3.11"
+lar-engine = {path = "../../lar", develop = true}
 google-generativeai = "^0.7.2"
 rich = "^14.2.0"
 google-genai = "^1.50.1"
@@ -31,8 +31,6 @@ pandas = "^2.2.1"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.4.2"
 python-dotenv = "^1.0.1"
-
-
 
 [build-system]
 requires = ["poetry-core"]

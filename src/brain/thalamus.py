@@ -8,7 +8,7 @@ from .hippocampus import Hippocampus
 from .default_mode_network import DefaultModeNetwork
 from .prefrontal import PrefrontalNode
 from lar.node import LLMNode, GraphState
-from lar.consciousness_stream import ConsciousnessStream
+from .consciousness_stream import ConsciousnessStream
 
 class Thalamus:
     """

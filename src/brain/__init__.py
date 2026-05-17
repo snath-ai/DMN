@@ -6,6 +6,7 @@ from .default_mode_network import DefaultModeNetwork
 from .prefrontal import PrefrontalNode
 from .autonomic_system import AutonomicNervousSystem
 from .memory_tiers import MemoryTiers
+from .consciousness_stream import ConsciousnessStream
 
 __all__ = [
     "Thalamus",
@@ -15,4 +16,5 @@ __all__ = [
     "PrefrontalNode",
     "AutonomicNervousSystem",
     "MemoryTiers",
+    "ConsciousnessStream",
 ]
