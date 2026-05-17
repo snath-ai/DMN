@@ -14,16 +14,16 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout lar-dmn
+      - name: Checkout lar-dmn → Lar_Main/DMN/lar
         uses: actions/checkout@v4
         with:
-          path: DMN
+          path: Lar_Main/DMN/lar
 
-      - name: Checkout lar-engine
+      - name: Checkout lar-engine → Lar_Main/lar
         uses: actions/checkout@v4
         with:
           repository: snath-ai/lar
-          path: lar
+          path: Lar_Main/lar
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-python@v5
@@ -34,28 +34,25 @@ jobs:
         with:
           version: 1.8.2
 
-      - name: Install lar-engine
-        run: pip install -e lar/
-
       - name: Install lar-dmn + dev deps
         run: |
-          cd DMN
+          cd Lar_Main/DMN/lar
           poetry install --sync --with dev
 
       - name: Run tests
         run: |
-          cd DMN
+          cd Lar_Main/DMN/lar
           poetry run pytest tests/ -v
 
       - name: Build wheel + sdist
         run: |
-          cd DMN
+          cd Lar_Main/DMN/lar
           poetry build
 
       - uses: actions/upload-artifact@v4
         with:
           name: lar-dmn-dist
-          path: DMN/dist/
+          path: Lar_Main/DMN/lar/dist/
 
   publish:
     name: Attach wheel to GitHub Release

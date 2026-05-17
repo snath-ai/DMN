@@ -16,18 +16,20 @@ jobs:
         python-version: ["3.11", "3.12"]
 
     steps:
-      # 1. Checkout this repo (lar-dmn / DMN)
-      - name: Checkout lar-dmn
+      # Mirror the local Lar_Main/ layout so path deps resolve identically:
+      #   Lar_Main/DMN/lar/pyproject.toml has: lar-engine = {path = "../../lar"}
+      #   From Lar_Main/DMN/lar/ → ../../lar → Lar_Main/lar  ✅
+
+      - name: Checkout lar-dmn → Lar_Main/DMN/lar
         uses: actions/checkout@v4
         with:
-          path: DMN
+          path: Lar_Main/DMN/lar
 
-      # 2. Checkout lar-engine (path dep resolution in CI)
-      - name: Checkout lar-engine
+      - name: Checkout lar-engine → Lar_Main/lar
         uses: actions/checkout@v4
         with:
           repository: snath-ai/lar
-          path: lar
+          path: Lar_Main/lar
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - uses: actions/setup-python@v5
@@ -39,18 +41,12 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
 
-      # 3. Install lar-engine first (editable, resolves the path dep)
-      - name: Install lar-engine
-        run: pip install -e lar/
-
-      # 4. Install lar-dmn with dev deps
-      - name: Install lar-dmn
+      - name: Install lar-dmn + dev deps
         run: |
-          cd DMN
+          cd Lar_Main/DMN/lar
           poetry install --no-interaction --with dev
 
-      # 5. Run tests
       - name: Run tests
         run: |
-          cd DMN
+          cd Lar_Main/DMN/lar
           poetry run pytest tests/ -v
