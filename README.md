@@ -202,7 +202,7 @@ class MyAdapterRouter(AbstractAdapterRouter):
 3. For each class with enough events: build a **System 1 centroid** (JSON) and a **System 2 LoRA adapter** (`.pt`)
 4. HMAC-sign both artifacts before writing to disk
 
-### System 1 — JSON centroid
+### System 1 — failure-class centroid
 
 ```python
 import hashlib, hmac, json

@@ -20,7 +20,7 @@ Stale adapters are refused before injection via the temporal trust gate `W = exp
 **Requirement:** High-risk systems must automatically record events to ensure traceability of the system's functioning throughout its lifecycle.
 
 **Lár DMN Implementation:**
-Every durable artifact produced by `AbstractDMN.consolidate()` — JSON centroid caches, LoRA `.pt` adapters, dream insight payloads — is **HMAC-SHA256 signed** with a domain-specific secret (`DMN_HMAC_SECRET` env var) before being written to disk. The `hmac_hex` field on every artifact allows auditors to verify that no memory was tampered with after consolidation.
+Every durable artifact produced by `AbstractDMN.consolidate()` — signed failure-class centroids, LoRA `.pt` adapters — is **HMAC-SHA256 signed** with a domain-specific secret (`DMN_HMAC_SECRET` env var) before being written to disk. The `hmac_hex` field on every artifact allows auditors to verify that no memory was tampered with after consolidation.
 
 `AbstractAdapterRouter._load_all()` verifies the HMAC of every artifact it loads. Any adapter that fails verification is silently skipped — never injected into inference.
 
