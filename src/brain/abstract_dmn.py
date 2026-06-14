@@ -70,8 +70,9 @@ class AbstractDMN(ABC):
 
         The event type is domain-specific:
           Robotics  — RoboticsDHardEvent (sensor divergence vectors)
-          Materials — trajectory_log dict (JEPA heuristic)
-          Locus     — routing decision record
+          Aviation  — AviationDHardEvent (pitot / radar divergence)
+          Basis     — BasisDHardEvent (fundamentals / market divergence)
+          Research  — ResearchDHardEvent (claims / reviews divergence)
           General   — log entry dict (role, content, timestamp)
 
         Implementations must be non-blocking. If writing to disk or a

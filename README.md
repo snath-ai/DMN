@@ -182,11 +182,27 @@ graph LR
 
 ## 3-Tier Memory
 
-| Tier | Contents | Lifetime | Injection |
+There are two distinct tier systems in Lár DMN. They share the same three-tier shape but serve different purposes:
+
+### Domain continual-learning tiers (`AbstractDMN` / `AbstractAdapterRouter`)
+
+| Tier | Contents | Lifetime | Written by |
 |:---|:---|:---|:---|
-| **Tier 1 — Episodic** | D_hard events / raw interaction logs | Perishable | Write path only |
-| **Tier 2 — Semantic** | Signed JSON centroids / ChromaDB warm summaries | Durable (geometry) | `recall()` / PFC |
-| **Tier 3 — Procedural** | Signed LoRA `.pt` adapters | Perishable (time-gated) | `AdapterRouter.resolve()` |
+| **Tier 1 — Episodic** | D_hard events (divergence vectors, failure labels) | Perishable | `ingest()` only |
+| **Tier 2 — Semantic** | HMAC-signed JSON centroid cache | Durable (geometry-stable) | `consolidate()` only |
+| **Tier 3 — Procedural** | HMAC-signed LoRA `.pt` adapters | Perishable (time-gated by W) | `consolidate()` only |
+
+Write direction is strictly upward: Tier 1 → Tier 2 → Tier 3. `recall()` reads from Tier 2. `AdapterRouter.resolve()` reads from Tier 2 (System 1) and Tier 3 (System 2).
+
+### Conversation memory tiers (`DefaultModeNetwork` / `Hippocampus` / `PrefrontalNode`)
+
+| Tier | Contents | Lifetime | Written by |
+|:---|:---|:---|:---|
+| **Tier 1 — Hot** | Rolling buffer of last 5 turns | Perishable | `ingest()` → JSONL log |
+| **Tier 2 — Warm** | Compressed semantic summaries | Durable | `consolidate()` → ChromaDB warm collection |
+| **Tier 3 — Cold** | Raw dream episodes | Durable | `consolidate()` → ChromaDB cold collection |
+
+`PrefrontalNode` retrieves from Tier 2 (warm) and Tier 3 (cold) and compresses the result before injecting into the LLM prompt.
 
 ---
 
