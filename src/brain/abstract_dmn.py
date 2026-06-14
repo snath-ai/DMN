@@ -1,17 +1,17 @@
 """
 AbstractDMN — Domain-agnostic Default Mode Network contract.
 ============================================================
-Every Snath domain project (Robotics, Aviation, Basis, Research, Locus)
-runs a DMN with the same three-phase cycle:
+Every Snath domain project runs a DMN with the same three-phase cycle:
 
   ingest     → accept a domain event into working memory
   consolidate → process accumulated events into durable corrections/memories
   recall     → retrieve relevant context for the current inference cycle
 
 The data types are fundamentally different across domains — robot sensor
-vectors, crystal trajectory heuristics, adverse event narratives — so the
-interface is intentionally generic. Domain implementations own their type
-contracts; this ABC owns the structural guarantee.
+vectors, flight anomaly labels, factor-model divergence records, paper
+review embeddings — so the interface is intentionally generic. Domain
+implementations own their type contracts; this ABC owns the structural
+guarantee.
 
 Three-tier memory correspondence
 ---------------------------------
@@ -23,10 +23,10 @@ Three-tier memory correspondence
   Tier 3 — Procedural: consolidate() may write here (weight-level, perishable)
                         Implementation: signed LoRA .pt files
 
-Not every domain reaches Tier 3. Locus consolidates into Tier 2 via
-ChromaDB (semantic vector search). Robotics, Aviation, Basis, and Research
-go all the way to Tier 3 (signed LoRA adapters) with flat-file .json
-centroids as Tier 2.
+Not every domain reaches Tier 3. Domains that require freeform semantic
+recall (open vocabulary) consolidate into Tier 2 via ChromaDB. Domains
+with a fixed, known failure-class vocabulary go all the way to Tier 3
+(signed LoRA adapters) with flat-file .json centroids as Tier 2.
 
 ChromaDB is NOT a requirement of this contract. The flat-file centroid
 cache is a valid Tier 2 implementation when failure classes are known in
@@ -69,10 +69,10 @@ class AbstractDMN(ABC):
         Accept a domain event into the DMN's working memory (Tier 1).
 
         The event type is domain-specific:
-          Robotics  — RoboticsDHardEvent (sensor divergence vectors)
-          Aviation  — AviationDHardEvent (pitot / radar divergence)
-          Basis     — BasisDHardEvent (fundamentals / market divergence)
-          Research  — ResearchDHardEvent (claims / reviews divergence)
+          Robotics  — sensor divergence vector pair
+          Aviation  — pitot / radar divergence event
+          Basis     — fundamentals / market divergence record
+          Research  — claims / reviews divergence record
           General   — log entry dict (role, content, timestamp)
 
         Implementations must be non-blocking. If writing to disk or a
@@ -101,9 +101,10 @@ class AbstractDMN(ABC):
         The query type and return type are domain-specific:
           Robotics / Aviation / Basis / Research
                     — failure_class str → centroid dict (exact-match flat-file)
-          Locus     — query str → heuristic str (ChromaDB FWR semantic search)
           DefaultModeNetwork
                     — query str → narrative str (ChromaDB warm/cold recall)
+          Open-vocabulary domains
+                    — query str → heuristic str (ChromaDB semantic search)
 
         Return None or an empty value (not an exception) when no relevant
         context exists. The inference spine must never block on recall.
