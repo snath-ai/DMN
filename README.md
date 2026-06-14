@@ -83,7 +83,7 @@ class AbstractAdapterRouter(ABC):
 
 When `W < min_trust`, System 1 still identifies and commits. System 2 correction is withheld. **Identify correctly, correct conservatively.**
 
-Formalised in *Architecture Is All You Need* (Sajeev 2026), §3.4 Remark (Temporal Decay and Synaptic Depression).
+Formalised in *Architecture Is All You Need* (Sajeev 2026), §3.4 — see [Papers & Research](#papers--research).
 
 ### The complete inference contract
 
@@ -321,6 +321,20 @@ python services/dreamer/dreamer_worker.py
 DMN is the memory layer for [Lár-JEPA](https://github.com/snath-ai/Lar-JEPA). After a `COMMIT_TRAJECTORY` routing decision, the JEPA world model writes trajectory heuristics into a `DefaultModeNetwork`-backed Hippocampus via the `AbstractDMN.ingest()` → `consolidate()` → `recall()` contract. At the next planning cycle, `recall()` retrieves the closest prior heuristic and injects it into the JEPA latent prompt.
 
 The integration bridge lives in **Lár-JEPA** (not this repo). Clone [snath-ai/Lar-JEPA](https://github.com/snath-ai/Lar-JEPA) and see `dmn/` for the consolidation node that connects the two repos.
+
+---
+
+## Papers & Research
+
+The formal foundations of the Lár DMN blueprint:
+
+| Paper | What it establishes | Reference |
+|:---|:---|:---|
+| **Annotation-Free Continual Learning** (Sajeev 2026) | 7 formal proofs that high-divergence events can be accumulated and consolidated without human annotation — the theoretical basis for the `ingest → consolidate` contract and the D_hard queue | [DOI 10.5281/zenodo.18175178](https://doi.org/10.5281/zenodo.18175178) |
+| **Difficulty Invariance (V7)** (Sajeev 2026) | Proves that failure-class centroid geometry is world-grounded and persists across encoder upgrades — the formal basis for `_nearest()` carrying no temporal gate | [DOI 10.5281/zenodo.20614051](https://doi.org/10.5281/zenodo.20614051) |
+| **Architecture Is All You Need** (Sajeev 2026) | Formalises the D1–D5 `AbstractDMN` invariants, AR1–AR5 `AbstractAdapterRouter` invariants, System 1 / System 2 trust asymmetry, and the synaptic depression remark (§3.4) | In preparation |
+
+The `AbstractAdapterRouter` trust-invariant design (`_nearest()` fires regardless of adapter age) is a direct consequence of V7: because D_hard geometry is world-grounded, identification does not decay — only correction does.
 
 ---
 
