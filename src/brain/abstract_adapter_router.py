@@ -56,14 +56,16 @@ class AbstractAdapterRouter(ABC):
     @abstractmethod
     def _nearest(self, delta) -> Optional[Any]:
         """
-        System 1 — trust-invariant centroid match.
+        System 1 — trust-invariant centroid match (V7: Difficulty Invariance).
 
         Find the closest stored centroid to delta (= z_a − z_b) by cosine
         similarity.  Return the matched adapter object or None if no match
         exceeds tau_sim.
 
-        MUST NOT apply a temporal gate — failure-class identification is
-        durable regardless of how old the adapter is.
+        MUST NOT apply a temporal gate.  V7 (Difficulty Invariance, proved
+        in DOI 10.5281/zenodo.20614051) guarantees that failure-class centroid
+        geometry is world-grounded and persists across encoder upgrades.
+        Identification fires regardless of adapter age or encoder version.
         """
 
     @abstractmethod
