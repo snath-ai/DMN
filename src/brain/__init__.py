@@ -1,5 +1,6 @@
 # brain package — public API surface
 from .abstract_dmn import AbstractDMN
+from .abstract_adapter_router import AbstractAdapterRouter
 from .thalamus import Thalamus
 from .hippocampus import Hippocampus
 from .amygdala import Amygdala
@@ -11,6 +12,7 @@ from .consciousness_stream import ConsciousnessStream
 
 __all__ = [
     "AbstractDMN",
+    "AbstractAdapterRouter",
     "Thalamus",
     "Hippocampus",
     "Amygdala",

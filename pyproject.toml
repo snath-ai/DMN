@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "lar-dmn"
-version = "2.3.0"
+version = "2.3.1"
 description = "Lár DMN: Cognitive Architecture (Bicameral Memory, Autopoiesis) built on the Lár Engine."
 authors = ["Aadithya Vishnu Sajeev <axdithya@snath.ai>", "Vinay S <vinay@snath.ai>"]
 maintainers = ["Aadithya Vishnu Sajeev <axdithya@snath.ai>", "Vinay S <vinay@snath.ai>"]

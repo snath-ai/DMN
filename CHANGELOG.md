@@ -1,5 +1,22 @@
 # Changelog
 
+## v2.3.1 — AbstractAdapterRouter (2026-06-14)
+### Added
+- `brain/abstract_adapter_router.py`: `AbstractAdapterRouter` — domain-agnostic contract for the two-pass System 1 + System 2 inference bridge
+  - `_load_all()` — abstract: load and HMAC-verify JSON centroid adapters at construction
+  - `_nearest(delta) → Optional[Any]` — abstract: System 1 trust-invariant centroid match (no temporal gate)
+  - `resolve(z_a, z_b, base_decision, conf_a, conf_b, enc_a, enc_b) → (decision, audit_note)` — abstract: System 1 + System 2 combined inference
+  - `available() → List[str]` — abstract: loaded failure-class / cluster IDs
+  - `refresh() → None` — concrete: calls `_load_all()` (removes copy-paste from all domain routers)
+  - `decay_weight(created_at_iso, lam) → float` — concrete static: `W = exp(-λ · Δt)`, the temporal trust formula copy-pasted across all four domains, now canonical
+- `AbstractAdapterRouter` exported from `brain/__init__.py`
+### Extension contract
+- Snath Robotics `RoboticsAdapterRouter`, Snath Aviation `AviationAdapterRouter`, Snath Basis `BasisAdapterRouter`, Snath Research `ResearchAdapterRouter` — all extend `AbstractAdapterRouter`
+- Domain routers own their HMAC key, λ-table, and centroid field names; `AbstractAdapterRouter` owns the structural guarantee and the decay formula
+### Closes the OS-level loop
+- With `AbstractAdapterRouter` in place, `AbstractModalEncoder` (Lár-JEPA), `AbstractDMN` (v2.3.0), and `AbstractAdapterRouter` together form the complete inference-time contract: encode → diverge → remember → route → adapt
+- Any new domain can swap encoders and the adapter system wires up automatically through the contract, not through copy-paste
+
 ## v2.3.0 — AbstractDMN (2026-06-14)
 ### Added
 - `brain/abstract_dmn.py`: `AbstractDMN` — domain-agnostic base class for all Snath DMN implementations
