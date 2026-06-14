@@ -27,8 +27,8 @@ Every Snath domain exposes an AdapterRouter that resolves a routing impasse
   System 2 refused → System 1 still identifies and commits.
   Identify correctly, correct conservatively.
 
-Formalised in "Architecture Is All You Need" (Sajeev 2026), §3.4
-Remark (Temporal Decay and Synaptic Depression).
+Proved in "The Encoder Is Not the Memory" (EIM, Sajeev 2026),
+DOI 10.5281/zenodo.20614051 — V7 Difficulty Invariance.
 """
 from __future__ import annotations
 

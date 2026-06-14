@@ -83,7 +83,7 @@ class AbstractAdapterRouter(ABC):
 
 When `W < min_trust`, System 1 still identifies and commits. System 2 correction is withheld. **Identify correctly, correct conservatively.**
 
-Formalised in *Architecture Is All You Need* (Sajeev 2026), §3.4 — see [Papers & Research](#papers--research).
+Proved in *The Encoder Is Not the Memory* (EIM, Sajeev 2026, [DOI 10.5281/zenodo.20614051](https://doi.org/10.5281/zenodo.20614051)) — see [Papers & Research](#papers--research).
 
 ### The complete inference contract
 
@@ -326,15 +326,16 @@ The integration bridge lives in **Lár-JEPA** (not this repo). Clone [snath-ai/L
 
 ## Papers & Research
 
-The formal foundations of the Lár DMN blueprint:
+The formal foundations of the Lár DMN blueprint. All papers are published open-access through **[Snath Research](https://github.com/snath-ai/snath-research)**:
 
-| Paper | What it establishes | Reference |
-|:---|:---|:---|
-| **Annotation-Free Continual Learning** (Sajeev 2026) | 7 formal proofs that high-divergence events can be accumulated and consolidated without human annotation — the theoretical basis for the `ingest → consolidate` contract and the D_hard queue | [DOI 10.5281/zenodo.18175178](https://doi.org/10.5281/zenodo.18175178) |
-| **Difficulty Invariance (V7)** (Sajeev 2026) | Proves that failure-class centroid geometry is world-grounded and persists across encoder upgrades — the formal basis for `_nearest()` carrying no temporal gate | [DOI 10.5281/zenodo.20614051](https://doi.org/10.5281/zenodo.20614051) |
-| **Architecture Is All You Need** (Sajeev 2026) | Formalises the D1–D5 `AbstractDMN` invariants, AR1–AR5 `AbstractAdapterRouter` invariants, System 1 / System 2 trust asymmetry, and the synaptic depression remark (§3.4) | In preparation |
+| Paper | Short name | DOI | What it establishes for DMN |
+|:---|:---|:---|:---|
+| **Divergence Is Not Noise** (Sajeev 2026) | DAS | [10.5281/zenodo.20278781](https://doi.org/10.5281/zenodo.20278781) | The routing signal detects hard cases better than fusion — proves that D_hard events are a valid, information-rich curriculum rather than noise to be discarded |
+| **Universal Cognitive Routing** (Sajeev 2026) | UCR | [10.5281/zenodo.20278775](https://doi.org/10.5281/zenodo.20278775) | The V1–V7 `AbstractDivergenceRouter` contract is domain-universal across 7 verticals — proves that the same `AbstractDMN` / `AbstractAdapterRouter` spine applies without modification across fields |
+| **The Lár Training Loop** (Sajeev 2026) | LTL | [10.5281/zenodo.20581128](https://doi.org/10.5281/zenodo.20581128) | Routing divergence flags are gradient signals — the formal basis for annotation-free continual learning via `ingest → consolidate` |
+| **The Encoder Is Not the Memory** (Sajeev 2026) | EIM | [10.5281/zenodo.20614051](https://doi.org/10.5281/zenodo.20614051) | V7 (Difficulty Invariance): D_hard centroid geometry is world-grounded and persists across encoder upgrades — the formal proof that `_nearest()` carries no temporal gate |
 
-The `AbstractAdapterRouter` trust-invariant design (`_nearest()` fires regardless of adapter age) is a direct consequence of V7: because D_hard geometry is world-grounded, identification does not decay — only correction does.
+The `AbstractAdapterRouter` trust-invariant design (`_nearest()` fires regardless of adapter age) is a direct consequence of EIM/V7: because D_hard geometry is world-grounded, identification does not decay — only correction does.
 
 ---
 
