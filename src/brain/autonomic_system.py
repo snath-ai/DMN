@@ -70,9 +70,9 @@ class AutonomicNervousSystem:
                     # This means we haven't processed the *latest* interactions yet.
                     if self.last_dream_time < last_interaction:
                          self._log(f"💤 [ANS] Brain is idle ({int(idle_duration)}s). Spindles active. Initiating R.E.M...")
-                         self.dmn.activate()
+                         results = self.dmn.consolidate()
                          self.last_dream_time = datetime.datetime.now()
-                         self._log(f"🧠 [ANS] R.E.M Cycle Complete because last_int {last_interaction} > prev_dream. Now last_dream={self.last_dream_time}")
+                         self._log(f"🧠 [ANS] R.E.M Cycle Complete. Built: {results}. last_dream={self.last_dream_time}")
                     else:
                          # Already dreamt about these logs.
                          pass

@@ -20,9 +20,11 @@ The Lár DMN solves this by utilizing the Hippocampus (ChromaDB) to permanently 
 **Requirement:** High-risk systems must automatically record events to ensure traceability of the system's functioning throughout its lifecycle.
 
 **Lár DMN Implementation:**
-Because DMN is built on the core Lár engine spine, it inherits the `AuditLogger` and `TensorSafeEncoder`. When the DMN "Dreamer" background daemon wakes up to compress raw trajectory logs into semantic heuristics, it executes as a standard deterministic Lár graph.
+The DMN "Dreamer" background daemon calls `consolidate()` on the `DefaultModeNetwork` when the system goes idle. Every durable artifact produced by `consolidate()` — journal entries, ChromaDB metadata, dream insight payloads — is **HMAC-SHA256 signed** with a domain-specific secret (`DMN_HMAC_SECRET` env var) before being written to disk.
 
-This means **the AI's memory consolidation process is fully logged and cryptographically signed (HMAC-SHA256)**. Auditors can inspect the exact causal chain of *how* and *why* a specific memory or heuristic was consolidated into the long-term vector store.
+This means **the AI's memory consolidation process produces a cryptographically signed audit trail** (HMAC-SHA256). The `hmac_hex` field on every journal entry allows auditors to verify that no memory was tampered with after consolidation. The conversation stream itself is logged by `ConsciousnessStream` as an append-only JSONL file.
+
+Note: the Dreamer daemon invokes `consolidate()` directly via the `AbstractDMN` contract rather than routing through the Lár graph engine, which handles the active inference spine. The audit trail for active inference (tool calls, routing decisions) is covered by the Lár `AuditLogger` on the main Thalamus path.
 
 ### 3. Tensor Safety in Long-Term Storage
 **Requirement:** Systems must securely and losslessly process operational data.

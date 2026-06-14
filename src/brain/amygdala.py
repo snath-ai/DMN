@@ -9,7 +9,7 @@ class Amygdala:
     It analyzes the user's input for sentiment and urgency BEFORE the Cortex processes it.
     """
     
-    def __init__(self, model="llama3"):
+    def __init__(self):
         self.model = f"ollama/{os.environ.get('OLLAMA_MODEL', 'llama3.2')}"
         host = os.environ.get("OLLAMA_HOST", "http://localhost:11434")
         self.url = f"{host}/api/generate"

@@ -12,8 +12,8 @@ graph TD
     
     subgraph "The Brain (Shared Volume)"
         STM
-        WarmMemory[(Warm Memory / Tier 2)]
-        Hippo[(Hippocampus / Tier 3 Cold)]
+        WarmMemory[(Warm Memory / Tier 2 Semantic)]
+        Hippo[(Hippocampus / Tier 3 Episodic Cold)]
     end
     
     Dreamer[Service B: Dreamer] -->|Read Logs| STM

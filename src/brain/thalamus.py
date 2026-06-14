@@ -189,7 +189,7 @@ class Thalamus:
                 print("💤 [Thalamus] Idle threshold reached. Activating Default Mode Network...")
                 self.is_dreaming = True
                 try:
-                    self.dmn.activate()
+                    self.dmn.consolidate()
                 except Exception as e:
                     print(f"❌ [DMN] Error: {e}")
                 finally:

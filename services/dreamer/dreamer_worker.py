@@ -55,11 +55,10 @@ def main():
                 if last_dream_time < last_interaction:
                     print(f"💤 [Dreamer] Brain is idle ({int(idle_duration)}s). Spindles active...")
                     
-                    # ACTIVATE DREAMING
-                    dmn.activate()
-                    
+                    # ACTIVATE DREAMING — call consolidate() to honour the AbstractDMN contract
+                    results = dmn.consolidate()
                     last_dream_time = datetime.datetime.now()
-                    print(f"🧠 [Dreamer] Cycle Complete. Resting.")
+                    print(f"🧠 [Dreamer] Cycle Complete. Built: {results}. Resting.")
                 else:
                     # Already dreamed for this session
                     pass

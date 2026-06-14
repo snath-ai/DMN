@@ -56,6 +56,34 @@ class TestHippocampusSaveMemory:
         assert data[0]["content"] == "First memory"
 
     @patch("brain.hippocampus.chromadb.PersistentClient")
+    def test_save_memory_journal_entry_is_hmac_signed(self, mock_chroma, tmp_path):
+        """D3 — every durable artifact must carry hmac_hex (v2.3.4+)."""
+        import hmac as _hmac
+        import hashlib
+
+        mock_client, _ = _mock_chromadb_client()
+        mock_chroma.return_value = mock_client
+
+        dreams = str(tmp_path / "dreams.json")
+        hippo = Hippocampus(dreams_path=dreams, chroma_path=str(tmp_path / "chroma"))
+        hippo.save_memory("Signed memory", [0.1], {"source": "test"})
+
+        with open(dreams) as f:
+            data = json.load(f)
+
+        entry = data[0]
+        assert "hmac_hex" in entry, "Journal entry must carry hmac_hex (D3)"
+
+        # Verify the signature matches the content
+        from brain.hippocampus import _JOURNAL_HMAC_KEY
+        expected = _hmac.new(
+            _JOURNAL_HMAC_KEY,
+            "Signed memory".encode("utf-8"),
+            hashlib.sha256,
+        ).hexdigest()
+        assert entry["hmac_hex"] == expected, "hmac_hex signature mismatch"
+
+    @patch("brain.hippocampus.chromadb.PersistentClient")
     def test_save_memory_appends_to_journal(self, mock_chroma, tmp_path):
         mock_client, _ = _mock_chromadb_client()
         mock_chroma.return_value = mock_client
