@@ -330,7 +330,7 @@ The integration bridge lives in **Lár-JEPA** (not this repo). Clone [snath-ai/L
 
 ## Papers & Research
 
-The formal foundations of the Lár DMN blueprint. All papers are published open-access through **[Snath Research](https://github.com/snath-ai/snath-research)**:
+The formal foundations of the Lár DMN blueprint. All papers are published open-access on Zenodo (Sajeev 2026):
 
 | Paper | Short name | DOI | What it establishes for DMN |
 |:---|:---|:---|:---|
