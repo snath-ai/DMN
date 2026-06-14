@@ -1,11 +1,16 @@
 import os
 import json
+import hashlib
+import hmac as _hmac
 import requests
 import datetime
-import time
 import uuid
-from typing import Any, List
+from typing import Any, List, Optional
 from .abstract_dmn import AbstractDMN
+
+# HMAC key for signing dream artifacts (D3 — AbstractDMN contract).
+# Override via DMN_HMAC_SECRET in production; must match Hippocampus._JOURNAL_HMAC_KEY.
+_DMN_HMAC_KEY = os.environ.get("DMN_HMAC_SECRET", "snath_dmn_default_2026").encode()
 try:
     from .hippocampus import Hippocampus
 except ImportError:
@@ -121,16 +126,16 @@ class DefaultModeNetwork(AbstractDMN):
 
         print(f"💾 [DMN] Insight consolidated into Long-Term Memory (ID: {dream_data['id']})")
 
-    def activate(self):
+    def activate(self) -> Optional[dict]:
         """
-        Triggers the dreaming process.
+        Run the dreaming cycle. Returns metadata dict of what was built, or None.
         """
         print(f"🌙 [DMN] Calculating Resting State Connectivity...")
         recent_logs = self._read_recent_logs(self.max_log_entries)
         
         if not recent_logs:
             print("💤 [DMN] No recent partial memories to consolidate. Sleeping.")
-            return
+            return None
 
         print(f"🧠 [DMN] Consolidating {len(recent_logs)} recent episodes...")
         
@@ -212,18 +217,25 @@ class DefaultModeNetwork(AbstractDMN):
             print(f"🧬 [DMN] Generating synaptic weights (Embeddings)...")
             embedding = self._get_embedding(insight_text_block)
 
-            # Generate ID
+            # Generate ID + HMAC signature (D3 — AbstractDMN contract)
             dream_id = str(uuid.uuid4())
-            ts = datetime.datetime.now().isoformat()
-            
+            ts       = datetime.datetime.now().isoformat()
+            sig      = _hmac.new(
+                _DMN_HMAC_KEY,
+                insight_text_block.encode("utf-8"),
+                hashlib.sha256,
+            ).hexdigest()
+
             # --- SAVE MEMORY (Hybrid: Chroma + JSON) ---
             if self.hippocampus:
                 print(f"💾 [DMN] Saving to Vector Brain (Hippocampus Cold Storage)...")
                 metadata = {
-                    "source": "dreamer", 
+                    "source":    "dreamer",
                     "timestamp": ts,
                     "log_count": len(recent_logs),
-                    "type": "dream_insight" 
+                    "type":      "dream_insight",
+                    "dream_id":  dream_id,
+                    "hmac_hex":  sig,
                 }
                 self.hippocampus.save_memory(
                     text=insight_text_block,
@@ -257,21 +269,25 @@ class DefaultModeNetwork(AbstractDMN):
                         )
                 except Exception as we:
                     print(f"⚠️ [DMN] Warm Memory Compression Warning: {we}")
-                    
+
             else:
-                # Legacy Fallback
+                # Legacy fallback — no Hippocampus
                 print(f"💾 [DMN] Saving to Legacy JSON (No Hippocampus)...")
                 dream_entry = {
-                    "id": dream_id,
+                    "id":        dream_id,
                     "timestamp": ts,
                     "log_count": len(recent_logs),
-                    "insights": insights_json
+                    "insights":  insights_json,
+                    "hmac_hex":  sig,
                 }
                 vector_entry = {"dream_id": dream_id, "embedding": embedding}
                 self._save_dream(dream_entry, vector_entry)
 
+            return {"type": "dream", "id": dream_id, "timestamp": ts, "hmac_hex": sig}
+
         except Exception as e:
             print(f"❌ [DMN] Consolidation Error: {e}")
+            return None
 
     # ------------------------------------------------------------------
     # AbstractDMN implementation
@@ -288,16 +304,8 @@ class DefaultModeNetwork(AbstractDMN):
 
     def consolidate(self, **kwargs) -> List[dict]:
         """Run the dreaming cycle and return a list with the dream metadata."""
-        self.activate()
-        if self.hippocampus:
-            try:
-                dreams = json.loads(open(self.dreams_path).read()) if os.path.exists(self.dreams_path) else []
-                if dreams:
-                    last = dreams[-1]
-                    return [{"type": "dream", "id": last.get("id"), "timestamp": last.get("timestamp")}]
-            except Exception:
-                pass
-        return []
+        result = self.activate()
+        return [result] if result else []
 
     def recall(self, query: Any, **kwargs) -> Any:
         """Semantic search over consolidated dreams via Hippocampus."""

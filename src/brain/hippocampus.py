@@ -1,9 +1,15 @@
 import os
 import json
 import uuid
+import hashlib
+import hmac as _hmac
 import chromadb
 from chromadb.config import Settings
 from typing import List, Optional
+
+# HMAC key for signing journal entries (Art. 12 / FDA 21 CFR Part 11 audit trail).
+# Override via DMN_HMAC_SECRET environment variable in production.
+_JOURNAL_HMAC_KEY = os.environ.get("DMN_HMAC_SECRET", "snath_dmn_default_2026").encode()
 
 # Constants
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -112,11 +118,17 @@ class Hippocampus:
 
         # 2. Save to JSON Journal (Narrative/Chronological)
         # We append to the existing list
+        sig = _hmac.new(
+            _JOURNAL_HMAC_KEY,
+            text.encode("utf-8"),
+            hashlib.sha256,
+        ).hexdigest()
         journal_entry = {
-            "id": memory_id,
+            "id":        memory_id,
             "timestamp": metadata.get("timestamp"),
-            "content": text,
-            "metadata": metadata
+            "content":   text,
+            "metadata":  metadata,
+            "hmac_hex":  sig,
         }
         
         journal_data = []
