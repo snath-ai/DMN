@@ -1,4 +1,5 @@
 # brain package — public API surface
+from .abstract_dmn import AbstractDMN
 from .thalamus import Thalamus
 from .hippocampus import Hippocampus
 from .amygdala import Amygdala
@@ -9,6 +10,7 @@ from .memory_tiers import MemoryTiers
 from .consciousness_stream import ConsciousnessStream
 
 __all__ = [
+    "AbstractDMN",
     "Thalamus",
     "Hippocampus",
     "Amygdala",

@@ -1,5 +1,18 @@
 # Changelog
 
+## v2.3.0 — AbstractDMN (2026-06-14)
+### Added
+- `brain/abstract_dmn.py`: `AbstractDMN` — domain-agnostic base class for all Snath DMN implementations
+  - `ingest(event)` — accept a domain event into Tier 1 (episodic) memory
+  - `consolidate(**kwargs) → List[dict]` — process events into Tier 2/3 (semantic/procedural) artifacts; all durable artifacts must be HMAC-signed
+  - `recall(query, **kwargs) → Any` — retrieve Tier 2 context for the current inference cycle
+  - `stats() → dict` — optional, default returns `{}`
+- `DefaultModeNetwork` now extends `AbstractDMN`; `activate()` retained as backward-compatible alias for `consolidate()`
+- `AbstractDMN` exported from `brain/__init__.py`
+### Extension contract
+- Snath Robotics `RoboticsDMN`, Snath Aviation, Snath Basis, Snath Research — all must extend `AbstractDMN`
+- Domain implementations own their type contracts; `AbstractDMN` owns the structural guarantee
+
 ## v2.2.0 — Audit Patch Release (2026-03-15)
 ### Fixed
 - `formatter.py`: `summarize_diff()` was checking key `"modified"` but `compute_state_diff()` writes `"updated"` — Modified column in Rich log tables was silently empty for every run

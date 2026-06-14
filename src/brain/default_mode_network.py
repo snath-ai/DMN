@@ -4,7 +4,8 @@ import requests
 import datetime
 import time
 import uuid
-# Add Hippocampus import
+from typing import Any, List
+from .abstract_dmn import AbstractDMN
 try:
     from .hippocampus import Hippocampus
 except ImportError:
@@ -18,7 +19,7 @@ DEFAULT_MODEL = os.environ.get("OLLAMA_MODEL", "llama3")
 # Dedicated embedding model config — never changes with cognitive model swaps.
 EMBED_MODEL = os.environ.get("OLLAMA_EMBED_MODEL", "llama3.2")
 
-class DefaultModeNetwork:
+class DefaultModeNetwork(AbstractDMN):
     """
     The Default Mode Network (DMN):
     Active during 'resting states'. It processes recent experiences (logs),
@@ -271,6 +272,52 @@ class DefaultModeNetwork:
 
         except Exception as e:
             print(f"❌ [DMN] Consolidation Error: {e}")
+
+    # ------------------------------------------------------------------
+    # AbstractDMN implementation
+    # ------------------------------------------------------------------
+
+    def ingest(self, event: Any) -> None:
+        """Write a log entry dict to the consciousness stream log file."""
+        try:
+            os.makedirs(os.path.dirname(self.logs_path), exist_ok=True)
+            with open(self.logs_path, "a") as f:
+                f.write(json.dumps(event) + "\n")
+        except Exception as e:
+            print(f"⚠️ [DMN] ingest failed: {e}")
+
+    def consolidate(self, **kwargs) -> List[dict]:
+        """Run the dreaming cycle and return a list with the dream metadata."""
+        self.activate()
+        if self.hippocampus:
+            try:
+                dreams = json.loads(open(self.dreams_path).read()) if os.path.exists(self.dreams_path) else []
+                if dreams:
+                    last = dreams[-1]
+                    return [{"type": "dream", "id": last.get("id"), "timestamp": last.get("timestamp")}]
+            except Exception:
+                pass
+        return []
+
+    def recall(self, query: Any, **kwargs) -> Any:
+        """Semantic search over consolidated dreams via Hippocampus."""
+        if self.hippocampus:
+            try:
+                return self.hippocampus.recall(query=str(query), max_memories=kwargs.get("max_memories", 3))
+            except Exception as e:
+                print(f"⚠️ [DMN] recall failed: {e}")
+        return ""
+
+    def stats(self) -> dict:
+        count = 0
+        try:
+            if os.path.exists(self.logs_path):
+                with open(self.logs_path) as f:
+                    count = sum(1 for _ in f)
+        except Exception:
+            pass
+        return {"log_entries": count, "dreams_path": self.dreams_path}
+
 
 # Test
 if __name__ == "__main__":
