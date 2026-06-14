@@ -24,7 +24,7 @@ Every durable artifact produced by `AbstractDMN.consolidate()` — JSON centroid
 
 `AbstractAdapterRouter._load_all()` verifies the HMAC of every artifact it loads. Any adapter that fails verification is silently skipped — never injected into inference.
 
-The background consolidation daemon (see `services/dreamer/dreamer_worker.py`) invokes `consolidate()` directly via the `AbstractDMN` contract. The audit trail for active inference decisions is covered separately by the Lár `AuditLogger` on the main execution path.
+Domain implementations invoke `consolidate()` directly via the `AbstractDMN` contract — typically in a nightly or post-session background cycle. The audit trail for active inference decisions is covered separately by the Lár `AuditLogger` on the main execution path.
 
 ### 3. Tensor Safety in Long-Term Storage
 **Requirement:** Systems must securely and losslessly process operational data.
