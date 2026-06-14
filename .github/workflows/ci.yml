@@ -18,21 +18,7 @@ jobs:
         python-version: ["3.11", "3.12"]
 
     steps:
-      # Mirror the local Lar_Main/ layout so path deps resolve identically:
-      #   Lar_Main/DMN/lar/pyproject.toml has: lar-engine = {path = "../../lar"}
-      #   From Lar_Main/DMN/lar/ → ../../lar → Lar_Main/lar  ✅
-
-      - name: Checkout lar-dmn → Lar_Main/DMN/lar
-        uses: actions/checkout@v4
-        with:
-          path: Lar_Main/DMN/lar
-
-      - name: Checkout lar-engine → Lar_Main/lar
-        uses: actions/checkout@v4
-        with:
-          repository: snath-ai/lar
-          path: Lar_Main/lar
-          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
@@ -43,15 +29,11 @@ jobs:
           virtualenvs-create: true
           virtualenvs-in-project: true
 
-      - name: Install lar-dmn + dev deps
-        run: |
-          cd Lar_Main/DMN/lar
-          poetry install --no-interaction --with dev
+      - name: Install dev deps
+        run: poetry install --no-interaction --with dev
 
       - name: Run tests
-        run: |
-          cd Lar_Main/DMN/lar
-          poetry run pytest tests/ -v
+        run: poetry run pytest tests/ -v
 
   dispatch:
     name: Trigger lar-jepa CI

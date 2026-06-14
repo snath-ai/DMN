@@ -1,5 +1,7 @@
 # Technical Report: The Lár Default Mode Network (DMN) Architecture
 
+> **Historical document (v1.x, January 2026).** This report describes the original LLM chatbot implementation (Thalamus, Hippocampus, Dreamer). As of v2.5.0, that implementation has been removed. The current architecture is a domain-agnostic blueprint — `AbstractDMN` + `AbstractAdapterRouter` — extended by domain repos (Robotics, Aviation, Basis, Research). See the README for the current design.
+
 **Date:** January 7, 2026  
 **Author:** Aadithya Vishnu Sajeev  
 **License:** Apache 2.0  

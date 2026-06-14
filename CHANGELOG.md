@@ -1,5 +1,21 @@
 # Changelog
 
+## v2.5.0 — Blueprint-only (2026-06-14)
+### Breaking
+- Removed `Hippocampus` and `DefaultModeNetwork` (ChromaDB + Ollama concrete implementation — not used by any domain repo)
+- Removed `services/dreamer/` (chatbot-era daemon that depended on `DefaultModeNetwork`)
+- Removed all five lar-engine test files (`test_core`, `test_llm`, `test_router`, `test_self_correct`, `test_tool`) — these tested the Lár engine, not the DMN layer
+- Removed all runtime dependencies (`chromadb`, `ollama`, `streamlit`, `litellm`, `openai`, `anthropic`, `google-genai`, `rich`, `networkx`, `deepdiff`, `pydantic`, `pandas`, `requests`, `urllib3`, `lar-engine`)
+### Changed
+- Public API is now exactly two classes: `AbstractDMN` + `AbstractAdapterRouter`
+- `pyproject.toml`: zero runtime deps — pure Python stdlib
+- `requirements.txt`: cleared
+- CI: removed `lar-engine` checkout step (no longer needed)
+### Added
+- `tests/test_contracts.py`: 14 stdlib-only contract tests covering both ABCs and `decay_weight`
+### Why
+All four domain repos (Robotics, Aviation, Basis, Research) use flat-file JSON centroids and `.pt` LoRA files — none use ChromaDB or Ollama. `Hippocampus`/`DefaultModeNetwork` were a leftover from the v1.x LLM chatbot era. This repo is the spec; domain repos are the implementations.
+
 ## v2.3.2 — README overhaul (2026-06-14)
 ### Changed
 - `README.md`: complete rewrite to reflect v2.3.x state

@@ -1,5 +1,25 @@
 # Release Notes
 
+## v2.5.0 — Blueprint-only (2026-06-14)
+
+**Breaking change** — removes all concrete implementations.
+
+### What changed
+The `Hippocampus` (ChromaDB vector store) and `DefaultModeNetwork` (Ollama narrative synthesis) classes have been removed. They were the reference implementation from the v1.x LLM chatbot era and are not used by any domain repo.
+
+The public API is now exactly two abstract base classes:
+
+```python
+from brain import AbstractDMN, AbstractAdapterRouter
+```
+
+Zero runtime dependencies. Pure Python stdlib. Domain repos (Robotics, Aviation, Basis, Research) are the concrete implementations — they use flat-file JSON centroids for System 1 and `.pt` LoRA adapters for System 2.
+
+### Migration
+If you were importing `Hippocampus` or `DefaultModeNetwork`, replace them with your own `AbstractDMN` subclass. See a domain repo for a full working example.
+
+---
+
 ## v2.0.1 — Patch Release
 
 **Release date:** 2026-03-15

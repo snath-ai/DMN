@@ -3,16 +3,18 @@ message: "If you use this software or architecture in your research, please cite
 authors:
   - family-names: "Sajeev"
     given-names: "Aadithya Vishnu"
-title: "Lár DMN: A Bicameral Cognitive Architecture for Asynchronous Memory Consolidation"
-version: 1.0.1
-date-released: 2026-01-07
+title: "Lár DMN: Abstract Blueprint for Domain-Specific Continual Learning Memory"
+version: 2.5.0
+date-released: 2026-06-14
 url: "https://github.com/snath-ai/DMN"
 keywords:
   - "artificial intelligence"
   - "cognitive architecture"
   - "default mode network"
-  - "memory consolidation"
-  - "autonomous agents"
-  - "bicameralism"
+  - "continual learning"
+  - "catastrophic forgetting"
+  - "LoRA adapters"
+  - "HMAC"
+  - "adapter routing"
 license: Apache-2.0
-abstract: "A reference implementation of a Bicameral Artificial Intelligence architecture that mimics the human Default Mode Network (DMN). It utilizes a dual-process system ('Fast' Thalamus vs. 'Slow' Dreamer) to enable asynchronous memory consolidation and prevent catastrophic forgetting in Long-Term Memory (LTM) systems."
+abstract: "Abstract base classes (AbstractDMN, AbstractAdapterRouter) for domain-specific continual learning memory in the Snath/Lár stack. Implements a two-pass System 1 (trust-invariant centroid match) + System 2 (temporally-gated LoRA injection) inference bridge. All durable artifacts are HMAC-SHA256 signed. Proved consistent with V7 Difficulty Invariance (EIM, DOI 10.5281/zenodo.20614051)."
