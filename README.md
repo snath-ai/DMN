@@ -6,8 +6,8 @@
   <a href="https://github.com/snath-ai/lar">
     <img alt="Based on" src="https://img.shields.io/badge/Spine-Lár%20Engine%20v2.2.0-blue?style=for-the-badge">
   </a>
-  <a href="https://github.com/snath-ai/DMN/releases/tag/v2.3.1">
-    <img alt="Version" src="https://img.shields.io/badge/lar--dmn-v2.3.1-blueviolet?style=for-the-badge">
+  <a href="https://github.com/snath-ai/DMN/releases/tag/v2.3.6">
+    <img alt="Version" src="https://img.shields.io/badge/lar--dmn-v2.3.6-blueviolet?style=for-the-badge">
   </a>
   <a href="https://doi.org/10.5281/zenodo.18175178">
     <img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.18175178-blue?style=for-the-badge" alt="DOI">
@@ -20,10 +20,7 @@ Every AI agent forgets everything the moment it stops running. Context windows f
 
 **DMN solves this architecturally.** No weight updates to the base model. No catastrophic forgetting. No retraining loops. Memory and adaptation are treated as infrastructure problems — the same way a database solves persistence without touching application code.
 
-DMN does two things:
-
-1. **Conversation memory** — a `DefaultModeNetwork` with Hippocampus/Dreamer/PFC that solves forgetting for LLM agents across sessions.
-2. **Continual learning contracts** — `AbstractDMN` and `AbstractAdapterRouter`, two ABCs that define how any domain accumulates high-divergence events, consolidates them into signed LoRA adapters, and applies them at inference time.
+**The primary deliverable is a blueprint** — two abstract base classes (`AbstractDMN` + `AbstractAdapterRouter`) that define how any domain accumulates high-divergence events, consolidates them into signed adapters, and applies them at inference time. This repo also ships a reference implementation of that blueprint for LLM conversation memory.
 
 ---
 
@@ -34,14 +31,14 @@ DMN is the memory layer of a three-part cognitive architecture:
 | Repository | Role |
 | :--- | :--- |
 | **[Lár](https://github.com/snath-ai/lar)** | The execution spine — deterministic graph engine, HMAC audit trail, EU AI Act compliance |
-| **[Lár DMN](https://github.com/snath-ai/DMN)** ← you are here | The memory layer — conversation memory + continual learning contracts |
+| **[Lár DMN](https://github.com/snath-ai/DMN)** ← you are here | The memory layer — continual learning blueprint + conversation memory reference implementation |
 | **[Lár-JEPA](https://github.com/snath-ai/Lar-JEPA)** | The world model — 10 ABCs for divergence routing, modal encoding, fault localisation |
 
 The industry is building the Brain (LLMs, JEPAs). We are building the Nervous System.
 
 ---
 
-## ABC Contract Layer (v2.3.x)
+## The Blueprint: ABC Contract Layer
 
 The primary deliverable of DMN v2.3.x is a pair of ABCs that close the continual learning loop across any domain:
 
@@ -52,7 +49,7 @@ from brain.abstract_dmn import AbstractDMN
 
 class AbstractDMN(ABC):
     def ingest(self, event) -> None: ...          # Tier 1: accept event into episodic memory
-    def consolidate(self, **kwargs) -> List[dict]: ...  # Tier 2/3: D_hard → signed LoRA adapters
+    def consolidate(self, **kwargs) -> List[dict]: ...  # Tier 2/3: D_hard → signed adapters
     def recall(self, query, **kwargs) -> Any: ...  # Tier 2: retrieve context for inference
     def stats(self) -> dict: ...                   # queue / memory introspection
 ```
@@ -86,7 +83,7 @@ Formalised in *Architecture Is All You Need* (Sajeev 2026), §3.4 Remark (Tempor
 
 ### The complete inference contract
 
-Together with `AbstractModalEncoder` and `AbstractDivergenceRouter` from Lár-JEPA, the full loop is now formally contracted:
+Together with `AbstractModalEncoder` and `AbstractDivergenceRouter` from Lár-JEPA, the full loop is formally contracted:
 
 ```
 AbstractModalEncoder      →  encode z_a, z_b
@@ -121,62 +118,13 @@ Human brains don't rewrite neural weights every night. The **Hippocampus** conso
 
 DMN implements this exact strategy as software:
 
-| Human Brain | Lár DMN |
+| Human Brain | Lár DMN (abstract) |
 |---|---|
 | Sensory Input | User messages / D_hard events |
-| Hippocampal Consolidation (Sleep) | `consolidate()` — D_hard queue → signed LoRA adapters |
-| Long-Term Cortical Storage | ChromaDB (Warm + Cold) + `.pt` adapter library |
-| Prefrontal Filtering (Attention) | `PrefrontalNode` — compression gateway |
-| Working Memory | Hot memory (last 5 turns) / Tier 1 episodic queue |
+| Hippocampal Consolidation (Sleep) | `consolidate()` — D_hard queue → signed adapters |
+| Long-Term Cortical Storage | Tier 2 (semantic centroids) + Tier 3 (LoRA `.pt` adapters) |
+| Working Memory | Tier 1 episodic queue |
 | Synaptic Depression | `W = exp(-λ·Δt)` — stale adapters refused at inference |
-
----
-
-## Architecture
-
-### Conversation memory (`DefaultModeNetwork`)
-
-The system runs as two separate processes — a Conscious mind (active chat) and a Subconscious mind (background consolidation).
-
-```mermaid
-graph TD
-    User -->|Chat| Thalamus
-    Thalamus -->|Feeling| Amygdala
-
-    subgraph Working Memory [Hot Memory]
-        Thalamus -->|Context| Cortex(LLMNode)
-    end
-
-    subgraph Deep Memory [Warm & Cold Memory]
-        Thalamus -->|Query| PFC[Prefrontal Cortex]
-        Hippo[(Hippocampus<br>ChromaDB)] -.->|Cold: Raw Chunks| PFC
-        Hippo -.->|Warm: Semantic Summaries| PFC
-        PFC -->|Compressed Synthesis| Cortex
-    end
-
-    Cortex -->|Response| User
-
-    subgraph DMN [Default Mode Network]
-        Cortex -.->|Logs| STM[Short Term Memory]
-        STM -->|Idle Trigger 30s| Dreamer(lar-dreamer)
-        Dreamer -->|Pass 1: Cold Consolidation| Hippo
-        Dreamer -->|Pass 2: Warm Compression| Hippo
-    end
-```
-
-### Domain continual learning (`AbstractDMN` + `AbstractAdapterRouter`)
-
-```mermaid
-graph LR
-    E1[Encoder A] -->|z_a| DR[DivergenceRouter]
-    E2[Encoder B] -->|z_b| DR
-    DR -->|TRIGGER_REPLAN| DMN
-    DMN -->|ingest| Q[(D_hard queue)]
-    Q -->|consolidate| A[Signed LoRA adapters]
-    A -->|recall| AR[AdapterRouter]
-    AR -->|System 1: centroid match| Decision
-    AR -->|System 2: W≥min_trust| E2
-```
 
 ---
 
@@ -194,7 +142,7 @@ There are two distinct tier systems in Lár DMN. They share the same three-tier 
 
 Write direction is strictly upward: Tier 1 → Tier 2 → Tier 3. `recall()` reads from Tier 2. `AdapterRouter.resolve()` reads from Tier 2 (System 1) and Tier 3 (System 2).
 
-### Conversation memory tiers (`DefaultModeNetwork` / `Hippocampus` / `PrefrontalNode`)
+### Conversation memory tiers (Reference Implementation — `DefaultModeNetwork`)
 
 | Tier | Contents | Lifetime | Written by |
 |:---|:---|:---|:---|
@@ -203,34 +151,6 @@ Write direction is strictly upward: Tier 1 → Tier 2 → Tier 3. `recall()` rea
 | **Tier 3 — Cold** | Raw dream episodes | Durable | `consolidate()` → ChromaDB cold collection |
 
 `PrefrontalNode` retrieves from Tier 2 (warm) and Tier 3 (cold) and compresses the result before injecting into the LLM prompt.
-
----
-
-## JEPA Integration — World Model Memories
-
-DMN integrates natively with Lár-JEPA. `JEPA_DMN_Consolidation_Node` writes JEPA trajectory heuristics directly into the Hippocampus.
-
-```python
-from dmn_integration.consolidation_node import JEPA_DMN_Consolidation_Node
-
-bridge = JEPA_DMN_Consolidation_Node(chroma_path="data/chroma_db")
-
-# After COMMIT_TRAJECTORY
-bridge.write_trajectory_heuristic({
-    "domain": "spatial_kinematics",
-    "action": action_vector,
-    "entropic_loss": 0.049,
-    "outcome": "committed",
-})
-
-# At the start of the next planning cycle
-prior_heuristics = bridge.recall_heuristics("orbital insertion n-body")
-# → "[JEPA Heuristic] Domain: spatial_kinematics | Outcome: committed | ..."
-```
-
-`TensorSafeEncoder` (built into the Lár engine) collapses raw PyTorch/NumPy tensors to structural metadata during consolidation — JEPA world-model states serialize to the DMN store seamlessly.
-
-Gracefully degrades if ChromaDB or Ollama are unavailable — JEPA execution is never blocked by DMN availability.
 
 ---
 
@@ -245,7 +165,7 @@ class MyDMN(AbstractDMN):
         self.queue.push(event)                    # Tier 1: episodic
 
     def consolidate(self, **kwargs) -> List[dict]:
-        # train signed LoRA adapters from resolved D_hard events
+        # train signed adapters from resolved D_hard events
         ...
 
     def recall(self, query, **kwargs) -> Any:
@@ -409,18 +329,54 @@ See **[snath-robotics](https://github.com/snath-ai/snath-robotics)** for a compl
 
 ---
 
-## EU AI Act Compliance
+## Reference Implementation: LLM Conversation Memory
 
-Lár DMN is structurally designed to support EU AI Act compliance for high-risk systems:
+This repo ships a concrete implementation of `AbstractDMN` for LLM conversation memory. This is one way to build on the blueprint — it is not required by the abstract interface.
 
-- **Article 15 (Robustness):** Proven heuristics are deterministically recalled, eliminating stochastic hallucination drift over time. Stale LoRA adapters are refused before injection via `W = exp(-λ·Δt)`.
-- **Article 12 (Record-Keeping):** The sleep/dream consolidation cycle executes on the Lár spine, producing cryptographically HMAC-signed audit logs of how memories and adapters are formed. `AbstractAdapterRouter` verifies HMAC before any adapter is trusted.
+### Architecture
 
-See [EU_AI_ACT_COMPLIANCE.md](EU_AI_ACT_COMPLIANCE.md) for full architectural details.
+The reference implementation runs as two separate processes — a Conscious mind (active chat) and a Subconscious mind (background consolidation).
 
----
+```mermaid
+graph TD
+    User -->|Chat| Thalamus
+    Thalamus -->|Feeling| Amygdala
 
-## Quick Start
+    subgraph Working Memory [Hot Memory - Tier 1]
+        Thalamus -->|Context| Cortex(LLMNode)
+    end
+
+    subgraph Deep Memory [Warm & Cold Memory - Tiers 2 & 3]
+        Thalamus -->|Query| PFC[Prefrontal Cortex]
+        Hippo[(Hippocampus<br>ChromaDB)] -.->|Cold: Raw Chunks| PFC
+        Hippo -.->|Warm: Semantic Summaries| PFC
+        PFC -->|Compressed Synthesis| Cortex
+    end
+
+    Cortex -->|Response| User
+
+    subgraph DMN [Default Mode Network - consolidate()]
+        Cortex -.->|Logs| STM[Short Term Memory]
+        STM -->|Idle Trigger 30s| Dreamer(lar-dreamer)
+        Dreamer -->|Pass 1: Cold Consolidation| Hippo
+        Dreamer -->|Pass 2: Warm Compression| Hippo
+    end
+```
+
+**Components:**
+
+| Component | Role |
+|---|---|
+| `DefaultModeNetwork` | Concrete `AbstractDMN` — wires together the brain components |
+| `Hippocampus` | ChromaDB-backed Tier 2 (warm) and Tier 3 (cold) vector storage |
+| `PrefrontalNode` | Retrieves and compresses memories before LLM prompt injection |
+| `Amygdala` | Fast emotional scoring of user input (sentiment, urgency) |
+| `Thalamus` | Routing node — writes Tier 1 hot log, queries PFC, calls LLM |
+| `AutonomicSystem` | Background daemon — calls `consolidate()` on idle |
+
+**Storage:** ChromaDB is used for Tier 2 and Tier 3 vector retrieval. The abstract interface does not mandate ChromaDB — any vector store (Qdrant, Weaviate, Pinecone, in-memory) works, as long as your `consolidate()` implementation writes HMAC-signed artifacts.
+
+### Quick Start
 
 ```bash
 git clone https://github.com/snath-ai/DMN
@@ -435,10 +391,49 @@ docker-compose up --build -d
 
 1. **Wake Phase** — Chat normally. The Amygdala scores sentiment live. Hot memory keeps the last 5 turns in context.
 2. **Sleep Phase** — Go idle for 30 seconds. The UI shows `💤 Brain Sleeping / Dreaming`. The `lar-dreamer` container activates.
-3. **Dream Phase** — The Dreamer runs two consolidation passes. Watch it live: `docker logs -f lar-dreamer`
+3. **Dream Phase** — The Dreamer calls `consolidate()`. Watch it live: `docker logs -f lar-dreamer`
 4. **Recall Phase** — Return and ask about a past topic. The PFC retrieves and compresses relevant memories before they hit the prompt.
 5. **Model Switching** — Swap the Conscious (fast) and Subconscious (reasoning) models on the fly from the Neural Configuration sidebar.
 6. **Wipe Brain** — `🧹 Wipe Brain` clears all logs and ChromaDB collections for a clean slate.
+
+---
+
+## JEPA Integration — World Model Memories
+
+DMN integrates natively with Lár-JEPA. `JEPA_DMN_Consolidation_Node` writes JEPA trajectory heuristics directly into the Hippocampus.
+
+```python
+from dmn_integration.consolidation_node import JEPA_DMN_Consolidation_Node
+
+bridge = JEPA_DMN_Consolidation_Node(chroma_path="data/chroma_db")
+
+# After COMMIT_TRAJECTORY
+bridge.write_trajectory_heuristic({
+    "domain": "spatial_kinematics",
+    "action": action_vector,
+    "entropic_loss": 0.049,
+    "outcome": "committed",
+})
+
+# At the start of the next planning cycle
+prior_heuristics = bridge.recall_heuristics("orbital insertion n-body")
+# → "[JEPA Heuristic] Domain: spatial_kinematics | Outcome: committed | ..."
+```
+
+`TensorSafeEncoder` (built into the Lár engine) collapses raw PyTorch/NumPy tensors to structural metadata during consolidation — JEPA world-model states serialize to the DMN store seamlessly.
+
+Gracefully degrades if ChromaDB or Ollama are unavailable — JEPA execution is never blocked by DMN availability.
+
+---
+
+## EU AI Act Compliance
+
+Lár DMN is structurally designed to support EU AI Act compliance for high-risk systems:
+
+- **Article 15 (Robustness):** Proven heuristics are deterministically recalled, eliminating stochastic hallucination drift over time. Stale LoRA adapters are refused before injection via `W = exp(-λ·Δt)`.
+- **Article 12 (Record-Keeping):** The sleep/dream consolidation cycle produces cryptographically HMAC-signed audit logs of how memories and adapters are formed. `AbstractAdapterRouter` verifies HMAC before any adapter is trusted.
+
+See [EU_AI_ACT_COMPLIANCE.md](EU_AI_ACT_COMPLIANCE.md) for full architectural details.
 
 ---
 
