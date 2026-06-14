@@ -1,5 +1,17 @@
 # Changelog
 
+## v2.3.2 — README overhaul (2026-06-14)
+### Changed
+- `README.md`: complete rewrite to reflect v2.3.x state
+  - Added ABC contract layer section: `AbstractDMN` + `AbstractAdapterRouter` with code examples
+  - Added domain extensions table: all 6 DMN implementations + 4 AdapterRouter implementations
+  - Added "Implementing a New Domain" quick-start stubs
+  - Added domain continual learning architecture diagram (Mermaid)
+  - Updated 3-tier memory table to include Tier 1/2/3 labels and lifetime column
+  - Updated version badge from v2.1.0 → v2.3.2
+  - Updated human analogy table to include synaptic depression / LoRA adapter story
+  - Preserved original conversation memory content (Hippocampus, Dreamer, PFC)
+
 ## v2.3.1 — AbstractAdapterRouter (2026-06-14)
 ### Added
 - `brain/abstract_adapter_router.py`: `AbstractAdapterRouter` — domain-agnostic contract for the two-pass System 1 + System 2 inference bridge
