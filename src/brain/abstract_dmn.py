@@ -16,13 +16,25 @@ contracts; this ABC owns the structural guarantee.
 Three-tier memory correspondence
 ---------------------------------
   Tier 1 — Episodic  : ingest() writes here (fast, perishable)
-  Tier 2 — Semantic  : consolidate() clusters here (ChromaDB / centroid cache)
-  Tier 3 — Procedural: consolidate() may write here (LoRA .pt, weight-level)
+                        Implementation: .jsonl queue file
+  Tier 2 — Semantic  : consolidate() clusters here (durable, geometry-stable)
+                        Implementation: signed .json centroid cache (flat-file)
+                        OR ChromaDB vector collection — both satisfy the contract
+  Tier 3 — Procedural: consolidate() may write here (weight-level, perishable)
+                        Implementation: signed LoRA .pt files
 
-Not every domain reaches Tier 3. Materials and Locus consolidate into
-Tier 2 (ChromaDB summaries). Robotics, Aviation, and Basis go all the way
-to Tier 3 (signed LoRA adapters). The ABC does not mandate which tiers
-are populated — only that the cycle is defined.
+Not every domain reaches Tier 3. Locus consolidates into Tier 2 via
+ChromaDB (semantic vector search). Robotics, Aviation, Basis, and Research
+go all the way to Tier 3 (signed LoRA adapters) with flat-file .json
+centroids as Tier 2.
+
+ChromaDB is NOT a requirement of this contract. The flat-file centroid
+cache is a valid Tier 2 implementation when failure classes are known in
+advance and recall() can use exact-match lookup by class name. ChromaDB
+(or any ANN index) becomes necessary when:
+  (a) recall() must do freeform semantic search over an open vocabulary, or
+  (b) the adapter library grows large enough that linear centroid scan in
+      AdapterRouter._nearest() degrades inference throughput.
 
 Derivation note
 ---------------
@@ -86,9 +98,11 @@ class AbstractDMN(ABC):
         Retrieve relevant context from Tier 2 memory for the current cycle.
 
         The query type and return type are domain-specific:
-          Robotics  — failure_class str → centroid dict
-          Materials — query str → heuristic str (ChromaDB semantic search)
-          General   — query str → narrative str
+          Robotics / Aviation / Basis / Research
+                    — failure_class str → centroid dict (exact-match flat-file)
+          Locus     — query str → heuristic str (ChromaDB FWR semantic search)
+          DefaultModeNetwork
+                    — query str → narrative str (ChromaDB warm/cold recall)
 
         Return None or an empty value (not an exception) when no relevant
         context exists. The inference spine must never block on recall.
