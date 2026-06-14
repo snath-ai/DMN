@@ -106,7 +106,7 @@ All five DMN implementations satisfy `AbstractDMN`. All four domain adapter rout
 
 | Project | DMN class | AdapterRouter class | Domain |
 |---|---|---|---|
-| **DMN** (this repo) | `DefaultModeNetwork` | — | LLM conversation memory (ChromaDB) |
+| **DMN** (this repo) | `DefaultModeNetwork` | — | Reference `AbstractDMN` — narrative consolidation via Ollama + Hippocampus |
 | **[Snath Robotics](https://github.com/snath-ai/snath-robotics)** | `RoboticsDMN` | `RoboticsAdapterRouter` | Dual-stream sensor fusion (vision + proprioception) |
 | **[Snath Aviation](https://github.com/snath-ai/snath-aviation)** | `AviationDMN` | `AviationAdapterRouter` | Flight anomaly detection (pitot / radar) |
 | **[Snath Basis](https://github.com/snath-ai/snath-basis)** | `BasisDMN` | `BasisAdapterRouter` | Factor-model divergence (fundamentals / market) |
