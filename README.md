@@ -110,8 +110,6 @@ All five DMN implementations satisfy `AbstractDMN`. All four domain adapter rout
 | **[Snath Aviation](https://github.com/snath-ai/snath-aviation)** | `AviationDMN` | `AviationAdapterRouter` | Flight anomaly detection (pitot / radar) |
 | **[Snath Basis](https://github.com/snath-ai/snath-basis)** | `BasisDMN` | `BasisAdapterRouter` | Factor-model divergence (fundamentals / market) |
 | **[Snath Research](https://github.com/snath-ai/snath-research)** | `ResearchDMN` | `ResearchAdapterRouter` | Paper review routing (claims / reviews) |
-***REMOVED***
-
 Each domain owns its HMAC key, λ-table, and centroid field names. `AbstractDMN` and `AbstractAdapterRouter` own the structural guarantee.
 
 ---
