@@ -258,6 +258,140 @@ class MyAdapterRouter(AbstractAdapterRouter):
 
 ---
 
+## Implementing `consolidate()` — The LoRA Training Loop
+
+`consolidate()` is the heart of the continual learning contract. Here is the full blueprint — the same pattern used across all Snath domain implementations.
+
+### What it does
+
+1. Pull **resolved** D_hard events from the queue (events that have been labelled with a winner stream)
+2. Group events by `failure_class`
+3. For each class with enough events: build a **System 1 centroid** (JSON) and a **System 2 LoRA adapter** (`.pt`)
+4. HMAC-sign both artifacts before writing to disk
+
+### System 1 — JSON centroid
+
+The centroid is the average of all stream vectors in the failure class. It is what `_nearest()` matches against at inference time — no temporal gate, no trust decay.
+
+```python
+import hashlib, hmac, json
+from pathlib import Path
+
+ADAPTER_KEY = b"your-domain-hmac-secret"  # keep per-domain, never commit
+
+def build_centroid(failure_class, group, adapter_dir):
+    dim = len(group[0].z_a)
+    centroid_a = [sum(e.z_a[i] for e in group) / len(group) for i in range(dim)]
+    centroid_b = [sum(e.z_b[i] for e in group) / len(group) for i in range(dim)]
+
+    payload = {
+        "failure_class": failure_class,
+        "centroid_a":    centroid_a,
+        "centroid_b":    centroid_b,
+        "n_events":      len(group),
+    }
+    sig = hmac.new(
+        ADAPTER_KEY,
+        json.dumps(payload, sort_keys=True).encode(),
+        hashlib.sha256,
+    ).hexdigest()
+    payload["hmac_hex"] = sig
+
+    path = Path(adapter_dir) / f"{failure_class}.json"
+    path.write_text(json.dumps(payload, indent=2))
+```
+
+### System 2 — Rank-1 LoRA adapter
+
+The LoRA adapter learns to map the faulty stream's latent vector toward the trusted stream's latent vector. Architecture is rank-1: two parameter matrices `A (dim × 1)` and `B (1 × dim)`. The adapted vector is `z + (z @ A) @ B`.
+
+```python
+import torch
+import torch.nn as nn
+import torch.optim as optim
+
+def build_lora(failure_class, group, winner_stream, adapter_dir,
+               n_epochs=100, lr=0.01):
+    # winner = the stream that was correct; train the other to match it
+    target = torch.tensor([e.z_a if winner_stream == "a" else e.z_b
+                           for e in group], dtype=torch.float32)
+    faulty = torch.tensor([e.z_b if winner_stream == "a" else e.z_a
+                           for e in group], dtype=torch.float32)
+    dim = faulty.shape[1]
+
+    A = nn.Parameter(torch.randn(dim, 1) * 0.01)
+    B = nn.Parameter(torch.randn(1, dim) * 0.01)
+    opt = optim.AdamW([A, B], lr=lr)
+
+    for _ in range(n_epochs):
+        opt.zero_grad()
+        adapted = faulty + torch.matmul(torch.matmul(faulty, A), B)
+        loss = nn.functional.l1_loss(adapted, target)
+        loss.backward()
+        opt.step()
+
+    # HMAC-sign the weights before saving
+    a_hex = hashlib.sha256(A.detach().numpy().tobytes()).hexdigest()[:16]
+    b_hex = hashlib.sha256(B.detach().numpy().tobytes()).hexdigest()[:16]
+    sig = hmac.new(
+        ADAPTER_KEY,
+        f"{failure_class}|{winner_stream}|{a_hex}|{b_hex}".encode(),
+        hashlib.sha256,
+    ).hexdigest()
+
+    payload = {
+        "A":              A.detach(),
+        "B":              B.detach(),
+        "failure_class":  failure_class,
+        "winner_stream":  winner_stream,
+        "n_events":       len(group),
+        "final_loss":     round(float(loss.item()), 6),
+        "hmac_hex":       sig,
+    }
+    torch.save(payload, str(Path(adapter_dir) / f"{failure_class}.pt"))
+```
+
+### Minimum events threshold
+
+Don't consolidate a class with fewer than 3–5 resolved events. A single example is noise; a centroid needs enough spread to be geometrically meaningful.
+
+```python
+MIN_EVENTS = 3  # tune per domain — higher for noisier sensors
+
+for failure_class, group in by_class.items():
+    if len(group) < MIN_EVENTS:
+        continue
+    build_centroid(failure_class, group, adapter_dir)
+    build_lora(failure_class, group, winner, adapter_dir)
+```
+
+### `_load_all()` — verify before trust
+
+`AbstractAdapterRouter._load_all()` must verify the HMAC of every artifact it loads. Any adapter that fails verification is silently skipped — never injected.
+
+```python
+def _load_all(self):
+    self._centroids = []
+    for path in Path(self.adapter_dir).glob("*.json"):
+        data = json.loads(path.read_text())
+        sig  = data.pop("hmac_hex")
+        expected = hmac.new(
+            ADAPTER_KEY,
+            json.dumps(data, sort_keys=True).encode(),
+            hashlib.sha256,
+        ).hexdigest()
+        if hmac.compare_digest(sig, expected):
+            data["hmac_hex"] = sig
+            self._centroids.append(data)
+        # silently skip tampered or unsigned adapters
+```
+
+### Reference implementation
+
+See **[snath-robotics](https://github.com/snath-ai/snath-robotics)** for a complete working implementation: dual-stream sensor fusion (vision + proprioception), full `consolidate()` with centroid and LoRA training, HMAC signing, and `RoboticsAdapterRouter` with System 1/2 resolution.
+
+---
+
 ## EU AI Act Compliance
 
 Lár DMN is structurally designed to support EU AI Act compliance for high-risk systems:
