@@ -137,12 +137,16 @@ DMN implements this exact strategy as software:
 | Tier | Contents | Lifetime | Written by |
 |:---|:---|:---|:---|
 | **Tier 1 — Episodic** | D_hard events (divergence vectors, failure labels) | Perishable | `ingest()` only |
-| **Tier 2 — Semantic** | HMAC-signed JSON centroid cache | Durable (geometry-stable) | `consolidate()` only |
+| **Tier 2 — Semantic** | HMAC-signed centroid store — geometry-stable | Durable | `consolidate()` only |
 | **Tier 3 — Procedural** | HMAC-signed LoRA `.pt` adapters | Perishable (time-gated by W) | `consolidate()` only |
 
 Write direction is strictly upward: Tier 1 → Tier 2 → Tier 3. `recall()` reads from Tier 2. `AdapterRouter.resolve()` reads from Tier 2 (System 1) and Tier 3 (System 2).
 
-Not every domain reaches Tier 3. Domains with open-vocabulary recall requirements consolidate into Tier 2 via ChromaDB semantic search (`DefaultModeNetwork`). Domains with a fixed failure-class vocabulary go all the way to Tier 3 (signed LoRA adapters) with flat-file JSON centroids as Tier 2.
+The Tier 2 storage format is an implementation choice — not mandated by the contract:
+- **Fixed failure-class vocabulary** (Robotics, Aviation, Basis, Research): flat-file JSON centroids per class, HMAC-signed before write
+- **Open-vocabulary / semantic search** (`DefaultModeNetwork`): ChromaDB vector collection, HMAC-signed on journal entries
+
+Not every domain reaches Tier 3. Domains with a fixed failure-class vocabulary go all the way to signed LoRA `.pt` adapters. Open-vocabulary domains consolidate into Tier 2 only.
 
 ---
 
