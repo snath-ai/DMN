@@ -341,6 +341,7 @@ The formal foundations of the Lár DMN blueprint. All papers are published open-
 | **Universal Cognitive Routing** (Sajeev 2026) | UCR | [10.5281/zenodo.20278775](https://doi.org/10.5281/zenodo.20278775) | The V1–V7 `AbstractDivergenceRouter` contract is domain-universal across 7 verticals — proves that the same `AbstractDMN` / `AbstractAdapterRouter` spine applies without modification across fields |
 | **The Lár Training Loop** (Sajeev 2026) | LTL | [10.5281/zenodo.20581128](https://doi.org/10.5281/zenodo.20581128) | Routing divergence flags are gradient signals — the formal basis for annotation-free continual learning via `ingest → consolidate` |
 | **The Encoder Is Not the Memory** (Sajeev 2026) | EIM | [10.5281/zenodo.20614051](https://doi.org/10.5281/zenodo.20614051) | V7 (Difficulty Invariance): D_hard centroid geometry is world-grounded and persists across encoder upgrades — the formal proof that `_nearest()` carries no temporal gate |
+| **Physics Assumption Violations** (Sajeev 2026) | PAV | [10.5281/zenodo.20682615](https://doi.org/10.5281/zenodo.20682615) | First physical-world validation of the DMN stack — D_hard events → `consolidate()` → LoRA adapters reduce divergence 65% overnight on MuJoCo Walker2d; one robot's physical surprise becomes fleet-wide knowledge by morning |
 
 The `AbstractAdapterRouter` trust-invariant design (`_nearest()` fires regardless of adapter age) is a direct consequence of EIM/V7: because D_hard geometry is world-grounded, identification does not decay — only correction does.
 
