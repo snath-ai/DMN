@@ -3,11 +3,11 @@
 </p>
 <p align="center"><em>Lár DMN — The Memory Layer for the Snath AI Cognitive Architecture</em></p>
 <p align="center">
-  <a href="https://github.com/snath-ai/lar">
-    <img alt="Based on" src="https://img.shields.io/badge/Spine-Lár%20Engine%20v2.2.0-blue?style=for-the-badge">
+  <a href="https://github.com/snath-ai/DMN/releases/tag/v2.5.0">
+    <img alt="Version" src="https://img.shields.io/badge/lar--dmn-v2.5.0-blueviolet?style=for-the-badge">
   </a>
-  <a href="https://github.com/snath-ai/DMN/releases/tag/v2.4.0">
-    <img alt="Version" src="https://img.shields.io/badge/lar--dmn-v2.4.0-blueviolet?style=for-the-badge">
+  <a href="https://github.com/snath-ai/DMN">
+    <img alt="Dependencies" src="https://img.shields.io/badge/dependencies-zero-brightgreen?style=for-the-badge">
   </a>
   <a href="https://doi.org/10.5281/zenodo.18175178">
     <img src="https://img.shields.io/badge/DOI-10.5281%2Fzenodo.18175178-blue?style=for-the-badge" alt="DOI">
