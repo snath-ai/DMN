@@ -1,11 +1,14 @@
-Lár DMN: A Showcase of Cognitive Architectures
-Copyright 2025 Aadithya Vishnu Sajeev & Vinay S
+Lár DMN: Abstract Blueprint for Domain-Specific Continual Learning Memory
+Copyright 2025-2026 Aadithya Vishnu Sajeev
 
-This product includes software developed by Snath.ai.
+This product includes software developed by Snath AI.
 
-This repository is a specialized showcase of cognitive architectures, demonstrating concepts such as:
-- Bicameral Memory Systems
-- Autopoietic (Self-Creating) AI
-- Neuro-Mimetic Design Pattern (Thalamus/Amygdala/Hippocampus/DMN)
+This repository provides a domain-agnostic blueprint for continual learning
+memory, demonstrating concepts such as:
+- Three-Tier Memory Architecture (Episodic / Semantic / Procedural)
+- HMAC-Signed Durable Artifact Pipeline (failure-class centroids + LoRA adapters)
+- Inference-Time Divergence Routing (System 1 centroid match / System 2 LoRA injection)
 
-It is built upon the Lár Engine foundation but serves distinct educational and demonstrative purposes.
+Built on published prior art: DOI 10.5281/zenodo.20278781 (DAS),
+10.5281/zenodo.20278775 (UCR), 10.5281/zenodo.20581128 (LTL),
+10.5281/zenodo.20614051 (EIM), 10.5281/zenodo.20682615 (PAV).

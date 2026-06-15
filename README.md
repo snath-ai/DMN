@@ -106,7 +106,6 @@ All five DMN implementations satisfy `AbstractDMN`. All four domain adapter rout
 
 | Project | DMN class | AdapterRouter class | Domain |
 |---|---|---|---|
-| **DMN** (this repo) | `DefaultModeNetwork` | — | Reference `AbstractDMN` — narrative consolidation via Ollama + Hippocampus |
 | **[Snath Robotics](https://github.com/snath-ai/snath-robotics)** | `RoboticsDMN` | `RoboticsAdapterRouter` | Dual-stream sensor fusion (vision + proprioception) |
 | **[Snath Aviation](https://github.com/snath-ai/snath-aviation)** | `AviationDMN` | `AviationAdapterRouter` | Flight anomaly detection (pitot / radar) |
 | **[Snath Basis](https://github.com/snath-ai/snath-basis)** | `BasisDMN` | `BasisAdapterRouter` | Factor-model divergence (fundamentals / market) |
@@ -144,7 +143,7 @@ Write direction is strictly upward: Tier 1 → Tier 2 → Tier 3. `recall()` rea
 
 The Tier 2 storage format is an implementation choice — not mandated by the contract:
 - **Fixed failure-class vocabulary** (Robotics, Aviation, Basis, Research): flat-file JSON centroids per class, HMAC-signed before write
-- **Open-vocabulary / semantic search** (`DefaultModeNetwork`): ChromaDB vector collection, HMAC-signed on journal entries
+- **Open-vocabulary / semantic search**: ANN index or vector collection, HMAC-signed on journal entries
 
 Not every domain reaches Tier 3. Domains with a fixed failure-class vocabulary go all the way to signed LoRA `.pt` adapters. Open-vocabulary domains consolidate into Tier 2 only.
 

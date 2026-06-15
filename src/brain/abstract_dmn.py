@@ -99,12 +99,10 @@ class AbstractDMN(ABC):
         Retrieve relevant context from Tier 2 memory for the current cycle.
 
         The query type and return type are domain-specific:
-          Robotics / Aviation / Basis / Research
+          Fixed-vocabulary domains (Robotics, Aviation, Basis, Research)
                     — failure_class str → centroid dict (exact-match flat-file)
-          DefaultModeNetwork
-                    — query str → narrative str (ChromaDB warm/cold recall)
           Open-vocabulary domains
-                    — query str → heuristic str (ChromaDB semantic search)
+                    — query str → heuristic str (ANN semantic search)
 
         Return None or an empty value (not an exception) when no relevant
         context exists. The inference spine must never block on recall.
