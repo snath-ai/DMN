@@ -16,9 +16,9 @@
 
 # Lár DMN — Continual Learning Without Retraining
 
-Every AI agent forgets everything the moment it stops running. Context windows fill up, old messages get silently truncated, and the agent permanently loses knowledge of past interactions. In world-model systems, high-divergence events are discarded instead of becoming the curriculum for adaptation.
+Every deployed AI system eventually encounters situations its training didn't anticipate — sensor drift, physics assumption violations, distribution shift, edge cases at the boundary of known failure modes. Standard practice discards these high-divergence events. The DMN accumulates them.
 
-**DMN solves this architecturally.** No weight updates to the base model. No catastrophic forgetting. No retraining loops. Memory and adaptation are treated as infrastructure problems — the same way a database solves persistence without touching application code.
+**DMN solves adaptation architecturally.** No weight updates to the base model. No full retraining loops. Hard cases accumulate at runtime, consolidate overnight into HMAC-signed failure-class centroids and LoRA adapters, and correct inference forward — without touching the base weights.
 
 This repo is a **blueprint** — two abstract base classes that define how any domain accumulates high-divergence events, consolidates them into signed adapters, and applies them at inference time. Clone it, extend it, and the OS-level promise holds by construction.
 
