@@ -307,22 +307,25 @@ See **[snath-robotics](https://github.com/snath-ai/snath-robotics)** for a compl
 
 ---
 
-## Background Consolidation Daemon
+## Background Consolidation
 
-`services/dreamer/dreamer_worker.py` shows how to run `consolidate()` as a background process — watching the interaction log for idle periods and triggering the DMN sleep cycle automatically:
+`consolidate()` is designed to run off the hot path — typically in a nightly or post-session background process. The pattern is the same across all domain implementations:
 
-```bash
-LOG_FILE=/data/short_term_memory.jsonl \
-MEMORY_FILE=/data/long_term_insights.json \
-OLLAMA_MODEL=qwen2.5:14b \
-python services/dreamer/dreamer_worker.py
+```python
+dmn = YourDMN(queue_path="d_hard.jsonl", adapter_dir="models/adapters")
+
+# run after a session or on a cron schedule
+built = dmn.consolidate()
+print(f"Built {len(built)} adapter(s).")
 ```
+
+When to call it is the domain's responsibility — the contract only guarantees that `consolidate()` reads resolved D_hard events, produces HMAC-signed artifacts, and is safe to call repeatedly.
 
 ---
 
 ## JEPA Integration — World Model Memories
 
-DMN is the memory layer for [Lár-JEPA](https://github.com/snath-ai/Lar-JEPA). After a `COMMIT_TRAJECTORY` routing decision, the JEPA world model writes trajectory heuristics into a `DefaultModeNetwork`-backed Hippocampus via the `AbstractDMN.ingest()` → `consolidate()` → `recall()` contract. At the next planning cycle, `recall()` retrieves the closest prior heuristic and injects it into the JEPA latent prompt.
+DMN is the memory layer for [Lár-JEPA](https://github.com/snath-ai/Lar-JEPA). After a `COMMIT_TRAJECTORY` routing decision, the JEPA world model writes D_hard events into the domain's `AbstractDMN` implementation via `ingest()`. Overnight, `consolidate()` clusters those events into signed failure-class centroids and LoRA adapters. At the next planning cycle, `recall()` and `AdapterRouter.resolve()` apply the learned corrections without retraining the encoder.
 
 The integration bridge lives in **Lár-JEPA** (not this repo). Clone [snath-ai/Lar-JEPA](https://github.com/snath-ai/Lar-JEPA) and see `dmn/` for the consolidation node that connects the two repos.
 
